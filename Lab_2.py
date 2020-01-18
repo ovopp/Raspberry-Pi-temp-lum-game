@@ -104,9 +104,9 @@ timeEntry.grid(row=1, column=4, padx=5, pady=5)
 
 getTimeButton = Button(window, text="Get Time", command=getTime).grid(row=1, column=5, padx=5, pady=5)
 
-startTempButton = Button(window, text="Start Temperature", command=StartTemp).grid(row=3, padx=5, pady=5,
+startTempButton = Button(window, text="Start Temperature Read", command=StartTemp).grid(row=3, padx=5, pady=5,
                                                                                    column=4)
-stopTempButton = Button(window, text="Stop Temperature", command=stopTemp).grid(row=4, column=4)
+stopTempButton = Button(window, text="Stop Temperature Read", command=stopTemp).grid(row=4, column=4)
 
 exitButton = Button(window, text="Exit", command=window.destroy).grid(row=7, column=5)
 
