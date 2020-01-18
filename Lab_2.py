@@ -3,47 +3,9 @@ import matplotlib
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
 # from gpiozero import MCP3008
-import logging
 import threading
 import time
-
-alive = True
-readTime = 2
-
-
-def __init__():
-    thread = threading.Thread(target=getTemp, args=())
-    thread.daemon = True
-    thread.start()
-
-
-def startTemp():
-    global alive
-    alive = True
-
-
-def stopTemp():
-    global alive
-    alive = False
-
-
-def getTemp():
-    while True:
-        while alive:
-            print("Temperature is: ")
-            time.sleep(float(readTime))
-
-
-def getTime():
-    global readTime
-    try:
-        tmp = e.get()
-        if float(tmp) is not float:
-            readTime = tmp
-    except ValueError:
-        print("invalid input")
-    print(readTime)
-
+import logging
 
 # photocell = MCP3008(0)
 # print(photocell.value)
@@ -51,56 +13,103 @@ def getTime():
 # lm35 = MCP3000(1)
 # print(lm35.value)
 
-matplotlib.use('TkAgg')
+'''Functions for buttons and initializations'''
 
 
-def start():
-    window.title.config(text="Start Engaged")
-
-
-def exit():
-    window.destroy()
-
-
+# Function for plot button
 def plot():
     window2 = Tk()
     window2.title("Plot")
     print("plot things")  # do plot things
 
 
-window = Tk()  # create a window
-window.title("Grid Manager Demo")  # set title
-message = Message(window, text="This Message widget occupies three rows and two columns")
+# Function for daemon Thread to read temperature (will be modified to save photocell / lm 35 data
+def getTemp():
+    while True:
+        while readTemp:
+            print("Temperature is: ")
+            time.sleep(float(readTime))
+
+
+# Initialization function for daemon thread to read values
+def __init__():
+    thread = threading.Thread(target=getTemp, args=())
+    thread.daemon = True
+    thread.start()
+
+
+# Function to start and stop daemon thread readout
+def StartTemp():
+    global readTemp
+    readTemp = True
+
+
+def stopTemp():
+    global readTemp
+    readTemp = False
+
+
+# Updates readTime variable with Entry information. Throws and handles incorrect inputs
+def getTime():
+    global readTime
+    try:
+        tmp = timeEntry.get()
+        if float(tmp) is not float:
+            readTime = tmp
+            window2 = Tk()
+            window2.title("Success!")
+            Label(window2, text="Valid input!").grid(row=1, column=3, columnspan=5)
+            Label(window2, text="The set read time is: " + str(readTime) + " Seconds").grid(row=2, column=3)
+            Button(window2, text="Close Window", command=lambda: window2.destroy()).grid(row=3, column=3)
+    except ValueError:
+        window2 = Tk()
+        window2.title("Warning!")
+        Label(window2, text="Invalid input! Please input another number").grid(row=1, column=3)
+        Label(window2, text="The current read time is: " + str(readTime) + " Seconds").grid(row=2, column=3)
+        Button(window2, text="Close Window", command=lambda: window2.destroy()).grid(row=3, column=3)
+
+
+# Function to destroy and start program for Start Program Button
+def StartProgram():
+    StartWindow.destroy()
+    global start
+    start = True
+
+
+# Initialization Variables
+readTime = 2
+readTemp = False
+start = False
+
+StartWindow = Tk()
+Button(StartWindow, text="Start Program", command=StartProgram).pack()
+Button(StartWindow, text="Quit", command=StartWindow.destroy).pack()
+StartWindow.mainloop()
+
+if not start:
+    quit()  # if user presses Quit instead of Start Program
+
+# Starting new window with main program
+window = Tk()
+__init__()
+matplotlib.use('TkAgg')
+window.title("Group 20's Temperature and Light Sensor Program")  # sets title
+message = Message(window, text="Welcome to the Future")
 message.grid(row=1, column=1, rowspan=3, columnspan=2)
+
+# Get Time Entry window and corresponding button
 Label(window, text="Read Time:").grid(row=1, column=3)
-e = Entry(window)
-e.grid(row=1, column=4, padx=5, pady=5)
-Button(window, text="Get Time", command=getTime).grid(row=1, column=5, padx=5, pady=5)
+timeEntry = Entry(window)
+timeEntry.grid(row=1, column=4, padx=5, pady=5)
 
-Label(window, text="Last Name:").grid(row=2, column=3)
-Entry(window).grid(row=2, column=4)
-Button(window, text="Start Temperature", command=startTemp).grid(row=3, padx=5, pady=5, column=4)
-Button(window, text="Stop Temperature", command=stopTemp).grid(row=4, column=4)
-fig = Figure(figsize=(5, 4))
-figCanvas = FigureCanvasTkAgg(fig, master=window)
+getTimeButton = Button(window, text="Get Time", command=getTime).grid(row=1, column=5, padx=5, pady=5)
 
-# Create a label
-label = Label(window, text="Welcome to Tkinter").grid(row=1, column=1)
+startTempButton = Button(window, text="Start Temperature", command=StartTemp).grid(row=3, padx=5, pady=5,
+                                                                                   column=4)
+stopTempButton = Button(window, text="Stop Temperature", command=stopTemp).grid(row=4, column=4)
 
-# Create a button
-button = Button(window, text="Click Me").grid(row=5, column=5)
+exitButton = Button(window, text="Exit", command=window.destroy).grid(row=7, column=5)
 
-# Start Button
-button2 = Button(window, text="Start", command=__init__).grid(row=6, column=5)
-
-# Exit Button
-button3 = Button(window, text="Exit", command=exit).grid(row=7, column=5)
-
-# Plot Button
-button4 = Button(window, text="Plot", command=plot).grid(row=8, column=5)
-
-# Clear Plot Button
-button5 = Button(window, text="Clear Plot", command=lambda: figCanvas.get_tk_widget().pack_forget()).grid(row=10,
-                                                                                                          column=5)
+plotButton = Button(window, text="Plot", command=plot).grid(row=8, column=5)
 
 window.mainloop()
