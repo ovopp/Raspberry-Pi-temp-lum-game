@@ -1,11 +1,13 @@
 from tkinter import *
 import matplotlib
+import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
 # from gpiozero import MCP3008
 import threading
 import time
 import random
+
 
 '''spidev module and code to read'''
 # import spidev
@@ -26,11 +28,19 @@ import random
 
 
 # Function for plot button
-def plot():
-    window2 = Tk()
-    window2.title("Plot")
-    print("plot things")  # do plot things
+def plotTemperature():
+    plt.plot([0, 1, 2, 3, 4, 5, 6, 7, 8, 9], temperatureQueue)
+    plt.ylabel("Temperature")
+    plt.xlabel("Time (s)")
+    plt.show()
+    plt.title("Temperature Plot")
 
+def plotLuminescence():
+    plt.plot([0, 1, 2, 3, 4, 5, 6, 7, 8, 9], lumQueue)
+    plt.ylabel("Lum")
+    plt.xlabel("Time (s)")
+    plt.show()
+    plt.title("Luminescence Plot")
 
 # Change the values to values of the photocell and lm 35 data
 # Function for daemon Thread to read temperature (will be modified to save photocell / lm 35 data
@@ -39,23 +49,17 @@ def getTemp():
     global lumQueue
     while True:
         while readTemp:
-            if len(temperatureQueue) >= 10:
-                temperatureQueue.pop()  # Pops the last element
-                temperatureQueue.insert(0, random.randint(0, 100))  # Pushes the first element into Queue, replace with lm35.value
-                lumQueue.pop()
-                lumQueue.insert(0, random.randint(0, 100))
-            else:
-                temperatureQueue.insert(0, 10)  # Adds the first element into Queue
-                lumQueue.insert(0, 7)
+            temperatureQueue.pop()  # Pops the last element
+            temperatureQueue.insert(0, random.randint(0, 100))  # Pushes the first element into Queue, replace with lm35.value
+            lumQueue.pop()
+            lumQueue.insert(0, random.randint(0, 100))
             if celcius:
                 tempLabel["text"] = str(temperatureQueue[0]) + " ℃"
                 lumLabel["text"] = str(lumQueue[0])
             else:
-                string = str(temperatureQueue[0]*1.8+32)
-                if len(string) >= 5:
-                    tempLabel["text"] = string[0:4] + " ℉"
-
+                tempLabel["text"] = str(round(temperatureQueue[0]*1.8+32)) + " ℉"
                 lumLabel["text"] = str(lumQueue[0])
+
             print("Temperature Queue: " + str(temperatureQueue))
             print("Luminescence Queue: " + str(lumQueue))
             time.sleep(float(readTime))
@@ -118,8 +122,8 @@ readTime = 2
 readTemp = False
 start = False
 celcius = True
-temperatureQueue = ["No Reading"]
-lumQueue = ["No Reading"]
+temperatureQueue = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+lumQueue = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 
 '''Program Starts Here'''
 StartWindow = Tk()
@@ -161,14 +165,15 @@ Button(window, text="C/F", command= celToFah).grid(row=6, column=3, padx=3, pady
 
 getTimeButton = Button(window, text="Set Time", command=getTime, width=10).grid(row=1, column=5, padx=5, pady=5)
 
-startTempButton = Button(window, text="Start Reading", command=StartTemp, width=10).grid(row=3, padx=5, pady=5,
-                                                                               column=5)
-stopTempButton = Button(window, text="Stop Reading", command=stopTemp, width=10).grid(row=4, column=5, padx=5, pady=5)
+startTempButton = Button(window, text="Start Reading", command=StartTemp, width=20).grid(row=3, padx=5, pady=5,
+                                                                               column=6)
+stopTempButton = Button(window, text="Stop Reading", command=stopTemp, width=20).grid(row=4, column=6, padx=5, pady=5)
 
-exitButton = Button(window, text="Exit", command=window.destroy, width=10).grid(row=6, column=5, padx=5, pady=5, columnspan=3)
-
-plotButton = Button(window, text="Plot", command=plot, width=10).grid(row=5, column=5, padx=5,
+plotTempButton = Button(window, text="Temperature Plot", command=plotTemperature, width=20).grid(row=5, column=6, padx=5,
                                                             pady=5)  # Opens a new window for plot data
+plotLumButton = Button(window, text="Luminescence Plot", command=plotLuminescence, width=20).grid(row=6, column=6, padx=5, pady=5)
+
+exitButton = Button(window, text="Exit", command=window.destroy, width=20).grid(row=7, column=6, padx=5, pady=5, columnspan=3)
 
 # Will be a thermometer at some point or another
 canvas = Canvas(window, width=200, height=500)
