@@ -8,7 +8,6 @@ import threading
 import time
 import random
 
-
 '''spidev module and code to read'''
 # import spidev
 # spi = spidev.SpiDev()
@@ -35,12 +34,14 @@ def plotTemperature():
     plt.show()
     plt.title("Temperature Plot")
 
+
 def plotLuminescence():
     plt.plot([0, 1, 2, 3, 4, 5, 6, 7, 8, 9], lumQueue)
     plt.ylabel("Lum")
     plt.xlabel("Time (s)")
     plt.show()
     plt.title("Luminescence Plot")
+
 
 # Change the values to values of the photocell and lm 35 data
 # Function for daemon Thread to read temperature (will be modified to save photocell / lm 35 data
@@ -50,14 +51,15 @@ def getTemp():
     while True:
         while readTemp:
             temperatureQueue.pop()  # Pops the last element
-            temperatureQueue.insert(0, random.randint(0, 100))  # Pushes the first element into Queue, replace with lm35.value
+            temperatureQueue.insert(0, random.randint(0,
+                                                      100))  # Pushes the first element into Queue, replace with lm35.value
             lumQueue.pop()
             lumQueue.insert(0, random.randint(0, 100))
             if celcius:
                 tempLabel["text"] = str(temperatureQueue[0]) + " ℃"
                 lumLabel["text"] = str(lumQueue[0])
             else:
-                tempLabel["text"] = str(round(temperatureQueue[0]*1.8+32)) + " ℉"
+                tempLabel["text"] = str(round(temperatureQueue[0] * 1.8 + 32)) + " ℉"
                 lumLabel["text"] = str(lumQueue[0])
 
             print("Temperature Queue: " + str(temperatureQueue))
@@ -89,6 +91,7 @@ def celToFah():
         celcius = False
     else:
         celcius = True
+
 
 # Updates readTime variable with Entry information. Throws and handles incorrect inputs
 def getTime():
@@ -161,19 +164,21 @@ tempLabel = Label(window, text=str(temperatureQueue[0]) + " ℃")
 tempLabel.grid(row=6, column=2, padx=3, pady=3)
 lumLabel = Label(window, text=str(lumQueue[0]))
 lumLabel.grid(row=7, column=2, padx=3, pady=3)
-Button(window, text="C/F", command= celToFah).grid(row=6, column=3, padx=3, pady=3)
+Button(window, text="C/F", command=celToFah).grid(row=6, column=3, padx=3, pady=3)
 
 getTimeButton = Button(window, text="Set Time", command=getTime, width=10).grid(row=1, column=5, padx=5, pady=5)
 
 startTempButton = Button(window, text="Start Reading", command=StartTemp, width=20).grid(row=3, padx=5, pady=5,
-                                                                               column=6)
+                                                                                         column=6)
 stopTempButton = Button(window, text="Stop Reading", command=stopTemp, width=20).grid(row=4, column=6, padx=5, pady=5)
 
-plotTempButton = Button(window, text="Temperature Plot", command=plotTemperature, width=20).grid(row=5, column=6, padx=5,
-                                                            pady=5)  # Opens a new window for plot data
-plotLumButton = Button(window, text="Luminescence Plot", command=plotLuminescence, width=20).grid(row=6, column=6, padx=5, pady=5)
+plotTempButton = Button(window, text="Temperature Plot", command=plotTemperature, width=20).grid(row=5, column=6,
+                                                                                                 padx=5,
+                                                                                                 pady=5)  # Opens a new window for plot data
+plotLumButton = Button(window, text="Luminescence Plot", command=plotLuminescence, width=20).grid(row=6, column=6,
+                                                                                                  padx=5, pady=5)
 
-exitButton = Button(window, text="Exit", command=window.destroy, width=20).grid(row=7, column=6, padx=5, pady=5, columnspan=3)
+exitButton = Button(window, text="Exit", command=exit, width=20).grid(row=7, column=6, padx=5, pady=5, columnspan=3)
 
 # Will be a thermometer at some point or another
 canvas = Canvas(window, width=200, height=500)
