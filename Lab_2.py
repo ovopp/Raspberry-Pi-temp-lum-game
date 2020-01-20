@@ -28,19 +28,26 @@ import random
 
 # Function for plot button
 def plotTemperature():
+    sum = 0
+    for i in temperatureQueue:
+        sum += i
+    avgTemp = sum / 10
+    avgQueue = [avgTemp] * 10
     plt.plot([0, 1, 2, 3, 4, 5, 6, 7, 8, 9], temperatureQueue)
-    plt.ylabel("Temperature")
-    plt.xlabel("Time (s)")
-    plt.show()
+    plt.ylabel("Temperature (Celcius)")
+    plt.xlabel("Last 10 readings")
     plt.title("Temperature Plot")
+    plt.plot([0, 1, 2, 3, 4, 5, 6, 7, 8, 9], avgQueue, label='Average Temperature')
+    plt.legend(loc="upper left")
+    plt.show()
 
 
 def plotLuminescence():
     plt.plot([0, 1, 2, 3, 4, 5, 6, 7, 8, 9], lumQueue)
     plt.ylabel("Lum")
     plt.xlabel("Time (s)")
-    plt.show()
     plt.title("Luminescence Plot")
+    plt.show()
 
 
 # Change the values to values of the photocell and lm 35 data
