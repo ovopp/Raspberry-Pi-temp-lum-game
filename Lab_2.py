@@ -162,13 +162,12 @@ if not start:
 '''Start of the main program'''
 
 window = Tk()
-window.geometry("1000x800")
+window.geometry("750x400")
 __init__()  # Initializes a daemon thread to read values off sensors (runs in the background, collects data)
 matplotlib.use('TkAgg')
 window.title("Group 20's Temperature and Light Sensor Program")  # sets title
 message = Message(window, text="Welcome to our program")
-message.configure(anchor="center")
-message.grid(row=1, column=1, rowspan=2, columnspan=2, padx=3, pady=3)
+message.grid(row=1, column=1, rowspan=2, columnspan=2, padx=1, pady=1)
 message1 = Message(window, text="To start sensor reading, set a read time (default is 2 seconds) and press Start "
                                 "Reading")
 message1.grid(row=3, column=1, rowspan=3, columnspan=2, padx=3, pady=3)
@@ -208,8 +207,8 @@ plotLumButton = Button(window, text="Luminescence Plot", command=plotLuminescenc
 exitButton = Button(window, text="Exit", command=exit, width=20).grid(row=7, column=6, padx=5, pady=5, columnspan=3)
 
 # Will be a thermometer at some point or another
-canvas = Canvas(window, width=200, height=500)
+'''canvas = Canvas(window, width=200, height=500)
 canvas.create_rectangle(15, 200, 50, 50)
-canvas.grid(column=4)
+canvas.grid(column=4)'''
 
 window.mainloop()  # Last line of project
