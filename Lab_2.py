@@ -28,6 +28,7 @@ import random
 
 # Function for plot button
 def plotTemperature():
+    plt.close()
     sum = 0
     for i in temperatureQueue:
         sum += i
@@ -43,10 +44,18 @@ def plotTemperature():
 
 
 def plotLuminescence():
-    plt.plot([0, 1, 2, 3, 4, 5, 6, 7, 8, 9], lumQueue)
-    plt.ylabel("Lum")
-    plt.xlabel("Time (s)")
+    plt.close()
+    sum = 0
+    for i in lumQueue:
+        sum += i
+    avgLum = sum / 10
+    avgQueue = [avgLum] * 10
+    plt.plot([0, 1, 2, 3, 4, 5, 6, 7, 8, 9], temperatureQueue)
+    plt.ylabel("Luminescence (Lum)")
+    plt.xlabel("Last 10 readings")
     plt.title("Luminescence Plot")
+    plt.plot([0, 1, 2, 3, 4, 5, 6, 7, 8, 9], avgQueue, label='Average Luminescence')
+    plt.legend(loc="upper left")
     plt.show()
 
 
@@ -65,9 +74,13 @@ def getTemp():
             if celcius:
                 tempLabel["text"] = str(temperatureQueue[0]) + " ℃"
                 lumLabel["text"] = str(lumQueue[0])
+                avgTempLabel["text"] = str(round(sum(temperatureQueue.__iter__())/10)) + " ℃"
+                avgLumLabel["text"] = str(round(sum(lumQueue.__iter__())/10))
             else:
                 tempLabel["text"] = str(round(temperatureQueue[0] * 1.8 + 32)) + " ℉"
                 lumLabel["text"] = str(lumQueue[0])
+                avgTempLabel["text"] = str(round(sum(temperatureQueue.__iter__()) / 10)) + " ℉"
+                avgLumLabel["text"] = str(round(sum(lumQueue.__iter__()) / 10))
 
             print("Temperature Queue: " + str(temperatureQueue))
             print("Luminescence Queue: " + str(lumQueue))
@@ -172,6 +185,13 @@ tempLabel.grid(row=6, column=2, padx=3, pady=3)
 lumLabel = Label(window, text=str(lumQueue[0]))
 lumLabel.grid(row=7, column=2, padx=3, pady=3)
 Button(window, text="C/F", command=celToFah).grid(row=6, column=3, padx=3, pady=3)
+
+Label(window, text="Average Temperature (Over 10 points): ").grid(row=8, column=1, padx=3, pady=3)
+Label(window, text="Average Luminescence (Over 10 points): ").grid(row=9, column=1, padx=3, pady=3)
+avgTempLabel = Label(window, text="0 ℃")
+avgTempLabel.grid(row=8, column=2, padx=3, pady=3)
+avgLumLabel = Label(window, text="0")
+avgLumLabel.grid(row=9, column=2, padx=3, pady=3)
 
 getTimeButton = Button(window, text="Set Time", command=getTime, width=10).grid(row=1, column=5, padx=5, pady=5)
 
