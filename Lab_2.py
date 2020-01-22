@@ -64,14 +64,14 @@ def getTemp():
             lumQueue.insert(0, random.randint(0, 100))
             setTemp(temperatureQueue[0])
             if celcius:
-                tempLabel["text"] = str(temperatureQueue[0]) + " ℃"
+                tempLabel["text"] = str(temperatureQueue[0]) + " *C"
                 lumLabel["text"] = str(lumQueue[0])
-                avgTempLabel["text"] = str(round(sum(temperatureQueue.__iter__())/10)) + " ℃"
+                avgTempLabel["text"] = str(round(sum(temperatureQueue.__iter__())/10)) + " *C"
                 avgLumLabel["text"] = str(round(sum(lumQueue.__iter__())/10))
             else:
-                tempLabel["text"] = str(round(temperatureQueue[0] * 1.8 + 32)) + " ℉"
+                tempLabel["text"] = str(round(temperatureQueue[0] * 1.8 + 32)) + " *F"
                 lumLabel["text"] = str(lumQueue[0])
-                avgTempLabel["text"] = str(round(sum(temperatureQueue.__iter__()) / 10)) + " ℉"
+                avgTempLabel["text"] = str(round(sum(temperatureQueue.__iter__()) / 10)) + " *F"
                 avgLumLabel["text"] = str(round(sum(lumQueue.__iter__()) / 10))
 
             print("Temperature Queue: " + str(temperatureQueue))
@@ -190,7 +190,7 @@ timeEntry.grid(row=3, column=1, sticky="E", padx=5, pady=5)
 currTemp.grid(row=6, column=1, sticky="W", padx=3, pady=3)
 currLum.grid(row=7, column=1, sticky="W", padx=3, pady=3)
 
-tempLabel = Label(window, text=str(temperatureQueue[0]) + " ℃")
+tempLabel = Label(window, text=str(temperatureQueue[0]) + " *C")
 tempLabel.grid(row=6, column=1, sticky="E", padx=3, pady=3)
 
 lumLabel = Label(window, text=str(lumQueue[0]))
@@ -207,7 +207,7 @@ avgLumLabel = Label(window, text="Average Luminescence: ")
 avgLumLabel.grid(row=9, column=1, sticky="W", padx=3, pady=3)
 
 
-avgTempLabel = Label(window, text="0 ℃")
+avgTempLabel = Label(window, text="0 *C")
 avgTempLabel.grid(row=8, column=1, sticky="E", padx=3, pady=3)
 avgLumLabel = Label(window, text="0")
 avgLumLabel.grid(row=9, column=1, sticky="E", padx=3, pady=3)
@@ -231,5 +231,3 @@ plotLumButton.grid(row=7, column=5, sticky="W", padx=5, pady=5)
 exitButton.grid(row=8, column=5, sticky="W", padx=5, pady=5, columnspan=3)
 
 window.mainloop()
-
-
