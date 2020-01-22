@@ -142,9 +142,9 @@ def StartProgram():
 def exitConfirm():
     windowExit = Tk()
     windowExit.title("Exit Program")
-    LabelExit = Label(windowExit, text="Close Program?").grid(row=0, column=1)
-    YesButton = Button(windowExit, text="Yes", command=exit).grid(row=1, column=1, sticky="E")
-    NoButton = Button(windowExit, text="No", command=windowExit.destroy).grid(row=1, column=2, sticky="W")
+    Label(windowExit, text="Close Program?").grid(row=0, column=1)
+    Button(windowExit, text="Yes", command=exit).grid(row=1, column=1, sticky="E")
+    Button(windowExit, text="No", command=windowExit.destroy).grid(row=1, column=2, sticky="W")
 
 
 
@@ -217,10 +217,10 @@ avgTempLabel.grid(row=8, column=1, sticky="E", padx=3, pady=3)
 avgLumLabel = Label(window, text="0")
 avgLumLabel.grid(row=9, column=1, sticky="E", padx=3, pady=3)
 
-startTempButton = Button(window, text="Start Reading", command=StartTemp)
-stopTempButton = Button(window, text="Stop Reading", command=stopTemp)
-plotTempButton = Button(window, text="Temperature Plot", command=plotTemperature)
-plotLumButton = Button(window, text="Luminescence Plot", command=plotLuminescence)
+startTempButton = Button(window, text="Start Reading", command=StartTemp, width=20)
+stopTempButton = Button(window, text="Stop Reading", command=stopTemp, width=20)
+plotTempButton = Button(window, text="Temperature Plot", command=plotTemperature, width=20)
+plotLumButton = Button(window, text="Luminescence Plot", command=plotLuminescence, width=20)
 exitButton = Button(window, text="Exit", command=exitConfirm, width=20)
 
 startTempButton.grid(row=4, column=5, padx=5, pady=5)
@@ -229,5 +229,6 @@ plotTempButton.grid(row=6, column=5, padx=5, pady=5)  # Opens a new window for p
 plotLumButton.grid(row=7, column=5, sticky="W", padx=5, pady=5)
 exitButton.grid(row=8, column=5, sticky="W", padx=5, pady=5, columnspan=3)
 
+window.mainloop()
 
 
