@@ -173,10 +173,11 @@ if not start:
 '''Start of the main program'''
 
 window = Tk()
-window.geometry("1000x800")
+window.geometry("750x400")
 __init__()  # Initializes a daemon thread to read values off sensors (runs in the background, collects data)
 matplotlib.use('TkAgg')
 window.title("Group 20's Temperature and Light Sensor Program")  # sets title
+
 
 welcome = Label(window, text="Welcome to our program!", fg = "blue", font=("Calibri", 25))
 start = Label(window, text="To start sensor reading, set a read time \n(default is 2 seconds) and press Start Reading")
@@ -228,5 +229,5 @@ plotTempButton.grid(row=6, column=5, padx=5, pady=5)  # Opens a new window for p
 plotLumButton.grid(row=7, column=5, sticky="W", padx=5, pady=5)
 exitButton.grid(row=8, column=5, sticky="W", padx=5, pady=5, columnspan=3)
 
-window.mainloop()
+
 
