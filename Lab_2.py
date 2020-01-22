@@ -7,21 +7,12 @@ from matplotlib.figure import Figure
 import threading
 import time
 import random
+from tkinter import ttk
 
-'''spidev module and code to read'''
-# import spidev
-# spi = spidev.SpiDev()
-# spi.open(0,0)
-# spi.max.speed_hz = 5000
-# channel = 0
-# adc = spi.xfer2([1, (8+channel)<<4,0]) # read from channel 0
-# data = ((adc[1]& 3) << 8) + adc[2] # form the 10 bit read value
 
-# photocell = MCP3008(0)
-# print(photocell.value)
+def setTemp(temp):
+    therm["value"] = temp
 
-# lm35 = MCP3000(1)
-# print(lm35.value)
 
 '''Functions for buttons and initializations'''
 
@@ -71,6 +62,7 @@ def getTemp():
                                                       100))  # Pushes the first element into Queue, replace with lm35.value
             lumQueue.pop()
             lumQueue.insert(0, random.randint(0, 100))
+            setTemp(temperatureQueue[0])
             if celcius:
                 tempLabel["text"] = str(temperatureQueue[0]) + " ℃"
                 lumLabel["text"] = str(lumQueue[0])
@@ -211,6 +203,15 @@ avgTempLabel.grid(row=8, column=1, sticky="W", padx=3, pady=3)
 avgLumLabel = Label(window, text="Average Luminescence: ")
 avgLumLabel.grid(row=9, column=1, sticky="W", padx=3, pady=3)
 
+#Thermometer
+Label(window, text="50*C/112*F").grid(row = 4, column=3, columnspan = 2, padx = 5, pady = 1) #High temp label
+s = ttk.Style()
+s.theme_use('clam')
+s.configure("red.Horizontal.TProgressbar", foreground='red', background='red')
+therm = ttk.Progressbar(window, style="red.Horizontal.TProgressbar", orient="vertical", length=200, mode="determinate", maximum=4, value=1) #Progress bar
+therm.grid(row=5, rowspan=4, column=3, columnspan = 2, padx=1, pady=1)
+therm["maximum"] = 50
+Label(window, text="0*C/32*F").grid(row = 9, column=3, columnspan = 2, padx = 1, pady = 1)
 
 avgTempLabel = Label(window, text="0 ℃")
 avgTempLabel.grid(row=8, column=1, sticky="E", padx=3, pady=3)
