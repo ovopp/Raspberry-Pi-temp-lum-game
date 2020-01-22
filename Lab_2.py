@@ -3,7 +3,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
-# from gpiozero import MCP3008
+from gpiozero import MCP3008
 import threading
 import time
 import random
@@ -78,6 +78,9 @@ def getTemp():
             print("Luminescence Queue: " + str(lumQueue))
             time.sleep(float(readTime))
 
+#Sets the temperature value on the thermometer
+def setTemp(temp):
+    therm["value"]=temp
 
 # Initialization function for daemon thread to read values
 def __init__():
@@ -203,6 +206,12 @@ avgTempLabel.grid(row=8, column=1, sticky="W", padx=3, pady=3)
 avgLumLabel = Label(window, text="Average Luminescence: ")
 avgLumLabel.grid(row=9, column=1, sticky="W", padx=3, pady=3)
 
+
+avgTempLabel = Label(window, text="0 ℃")
+avgTempLabel.grid(row=8, column=1, sticky="E", padx=3, pady=3)
+avgLumLabel = Label(window, text="0")
+avgLumLabel.grid(row=9, column=1, sticky="E", padx=3, pady=3)
+
 #Thermometer
 Label(window, text="50*C/112*F").grid(row = 4, column=3, columnspan = 2, padx = 5, pady = 1) #High temp label
 s = ttk.Style()
@@ -211,17 +220,8 @@ s.configure("red.Horizontal.TProgressbar", foreground='red', background='red')
 therm = ttk.Progressbar(window, style="red.Horizontal.TProgressbar", orient="vertical", length=200, mode="determinate", maximum=4, value=1) #Progress bar
 therm.grid(row=5, rowspan=4, column=3, columnspan = 2, padx=1, pady=1)
 therm["maximum"] = 50
-Label(window, text="0*C/32*F").grid(row = 9, column=3, columnspan = 2, padx = 1, pady = 1)
+Label(window, text="0*C/32*F").grid(row = 9, column=3, columnspan = 2, padx = 1, pady = 1) #Low temp label
 
-avgTempLabel = Label(window, text="0 ℃")
-avgTempLabel.grid(row=8, column=1, sticky="E", padx=3, pady=3)
-avgLumLabel = Label(window, text="0")
-avgLumLabel.grid(row=9, column=1, sticky="E", padx=3, pady=3)
-
-startTempButton = Button(window, text="Start Reading", command=StartTemp, width=20)
-stopTempButton = Button(window, text="Stop Reading", command=stopTemp, width=20)
-plotTempButton = Button(window, text="Temperature Plot", command=plotTemperature, width=20)
-plotLumButton = Button(window, text="Luminescence Plot", command=plotLuminescence, width=20)
 exitButton = Button(window, text="Exit", command=exitConfirm, width=20)
 
 startTempButton.grid(row=4, column=5, padx=5, pady=5)
