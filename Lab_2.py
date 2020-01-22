@@ -7,6 +7,7 @@ from matplotlib.figure import Figure
 import threading
 import time
 import random
+from tkinter import tkk
 
 '''spidev module and code to read'''
 # import spidev
@@ -71,6 +72,7 @@ def getTemp():
                                                       100))  # Pushes the first element into Queue, replace with lm35.value
             lumQueue.pop()
             lumQueue.insert(0, random.randint(0, 100))
+            setTemp(temperatureQueue[0])
             if celcius:
                 tempLabel["text"] = str(temperatureQueue[0]) + " ℃"
                 lumLabel["text"] = str(lumQueue[0])
@@ -86,6 +88,9 @@ def getTemp():
             print("Luminescence Queue: " + str(lumQueue))
             time.sleep(float(readTime))
 
+#Sets the temperature value on the thermometer
+def setTemp(temp):
+    therm["value"]=temp
 
 # Initialization function for daemon thread to read values
 def __init__():
@@ -216,6 +221,16 @@ avgTempLabel = Label(window, text="0 ℃")
 avgTempLabel.grid(row=8, column=1, sticky="E", padx=3, pady=3)
 avgLumLabel = Label(window, text="0")
 avgLumLabel.grid(row=9, column=1, sticky="E", padx=3, pady=3)
+
+#Thermometer
+Label(window, text="50*C/112*F").grid(row = 4, column=3, columnspan = 2, padx = 5, pady = 1) #High temp label
+s = ttk.Style()
+s.theme_use('clam')
+s.configure("red.Horizontal.TProgressbar", foreground='red', background='red')
+therm = ttk.Progressbar(window, style="red.Horizontal.TProgressbar", orient="vertical", length=200, mode="determinate", maximum=4, value=1) #Progress bar
+therm.grid(row=5, rowspan=4, column=3, columnspan = 2, padx=1, pady=1)
+therm["maximum"] = 50
+Label(window, text="0*C/32*F").grid(row = 9, column=3, columnspan = 2, padx = 1, pady = 1) #Low temp label
 
 startTempButton = Button(window, text="Start Reading", command=StartTemp)
 stopTempButton = Button(window, text="Stop Reading", command=stopTemp)
