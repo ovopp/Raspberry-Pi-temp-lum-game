@@ -76,12 +76,12 @@ def getTempLum():
             setLight(lumQueue[0])
             if celcius:
                 tempLabel["text"] = str(temperatureQueue[0]) + " *C"
-                avgTempLabel["text"] = str(round(sum(temperatureQueue.__iter__())/10)) + " *C"
+                avgTempLabel["text"] = str(round(sum(temperatureQueue.__iter__())/len([i for i in temperatureQueue if i != 0]))) + " *C"
             else:
                 tempLabel["text"] = str(round(temperatureQueue[0] * 1.8 + 32)) + " *F"
-                avgTempLabel["text"] = str(round(1.8*sum(temperatureQueue.__iter__()) / 10 + 32)) + " *F"
+                avgTempLabel["text"] = str(round(1.8*sum(temperatureQueue.__iter__()) / len([i for i in temperatureQueue if i != 0]) + 32)) + " *F"
             lumLabel["text"] = str(lumQueue[0])
-            avgLumLabel["text"] = str(round(sum(lumQueue.__iter__()) / 10))
+            avgLumLabel["text"] = str(round(sum(lumQueue.__iter__()) / len([i for i in lumQueue if i != 0])))
 
             print("Temperature Queue: " + str(temperatureQueue))
             print("Luminescence Queue: " + str(lumQueue))
