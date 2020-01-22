@@ -62,7 +62,7 @@ def plotLuminescence():
 
 # Change the values to values of the photocell and lm 35 data
 # Function for daemon Thread to read temperature (will be modified to save photocell / lm 35 data
-def getTemp():
+def getTempLum():
     global temperatureQueue
     global lumQueue
     while True:
@@ -73,6 +73,7 @@ def getTemp():
             lumQueue.pop()
             lumQueue.insert(0, random.randint(0, 100))
             setTemp(temperatureQueue[0])
+            setLight(lumQueue[0])
             if celcius:
                 tempLabel["text"] = str(temperatureQueue[0]) + " *C"
                 lumLabel["text"] = str(lumQueue[0])
@@ -92,9 +93,13 @@ def getTemp():
 def setTemp(temp):
     therm["value"]=temp
 
+#Sets the light level on the light meter
+def setLight(lightLevel):
+    lightMeter["value"]=lightLevel
+
 # Initialization function for daemon thread to read values
 def __init__():
-    thread = threading.Thread(target=getTemp, args=())
+    thread = threading.Thread(target=getTempLum, args=())
     thread.daemon = True
     thread.start()
 
@@ -187,50 +192,76 @@ window.title("Group 20's Temperature and Light Sensor Program")  # sets title
 welcome = Label(window, text="Welcome to our program!", fg = "blue", font=("Calibri", 25))
 start = Label(window, text="To start sensor reading, set a read time \n(default is 2 seconds) and press Start Reading")
 blank = Label(window, text="\n\n").grid(row=1, column=1)
-currTemp = Label(window, text="Current Temperature: ")
-currLum = Label(window, text="Current Luminescence: ")
 
 timeLabel = Label(window, text="Read Time:")
 timeEntry = Entry(window)
 
-welcome.grid(row=0, column=2, padx=5, pady=20)
+welcome.grid(row=0, column=2, columnspan = 2, padx=5, pady=20)
 start.grid(row=2, column=1, sticky="W")
 timeLabel.grid(row=3, column=1, sticky="W", padx=5, pady=5)
 timeEntry.grid(row=3, column=1, sticky="E", padx=5, pady=5)
-currTemp.grid(row=6, column=1, sticky="W", padx=3, pady=3)
-currLum.grid(row=7, column=1, sticky="W", padx=3, pady=3)
 
-tempLabel = Label(window, text=str(temperatureQueue[0]) + " *C")
-tempLabel.grid(row=6, column=1, sticky="E", padx=3, pady=3)
-
-lumLabel = Label(window, text=str(lumQueue[0]))
-lumLabel.grid(row=7, column=1, sticky="E", padx=3, pady=3)
-
-convertCF = Button(window, text="C/F", command=celToFah)
-convertCF.grid(row=6, column=2, sticky="W", padx=3, pady=3)
 getTimeButton = Button(window, text="Set Time", command=getTime)
 getTimeButton.grid(row=3, column=2, sticky="W", padx=5, pady=5)
 
-avgTempLabel = Label(window, text="Average Temperature: ")
-avgTempLabel.grid(row=8, column=1, sticky="W", padx=3, pady=3)
+'''Liminescence'''
+#Current luminenscence label
+currLum = Label(window, text="Luminescence: ")
+currLum.grid(row=4, column=3, padx=3, pady=3)
+
+#Current luminenscence
+lumLabel = Label(window, text=str(lumQueue[0]))
+lumLabel.grid(row=7, column=3, sticky="E", padx=60, pady=3)
+
+#Light meter
+Label(window, text="255").grid(row = 5, column=3, padx = 5, pady = 1) #High temp label
+s = ttk.Style()
+s.theme_use('clam')
+s.configure("yellow.Horizontal.TProgressbar", foreground='black', background='yellow')
+lightMeter = ttk.Progressbar(window, style="yellow.Horizontal.TProgressbar", orient="vertical", length=200, mode="determinate", maximum=4, value=1) #Progress bar
+lightMeter.grid(row=6, rowspan=5, column=3, padx=5, pady=1)
+lightMeter["maximum"] = 255
+Label(window, text="0").grid(row = 11, column=3, padx = 5, pady = 1) #Low temp label
+
+#Average luminenscence label
 avgLumLabel = Label(window, text="Average Luminescence: ")
-avgLumLabel.grid(row=9, column=1, sticky="W", padx=3, pady=3)
+avgLumLabel.grid(row=12, column=3, sticky="W", padx=10, pady=3)
 
-
-avgTempLabel = Label(window, text="0 *C")
-avgTempLabel.grid(row=8, column=1, sticky="E", padx=3, pady=3)
+#Average luminenscence
 avgLumLabel = Label(window, text="0")
-avgLumLabel.grid(row=9, column=1, sticky="E", padx=3, pady=3)
+avgLumLabel.grid(row=12, column=3, sticky="E", padx=10, pady=3)
+
+
+'''Temperature'''
+#Current temperature label
+currTemp = Label(window, text="Temperature: ")
+currTemp.grid(row=4, column=1, padx=3, pady=3)
+
+#Current temerature
+tempLabel = Label(window, text=str(temperatureQueue[0]) + " *C")
+tempLabel.grid(row=7, column=1, sticky="E", padx=60, pady=3)
+
+#CF button
+convertCF = Button(window, text="C/F", command=celToFah)
+convertCF.grid(row=7, column=1, sticky="E", padx=25, pady=3)
 
 #Thermometer
-Label(window, text="50*C/112*F").grid(row = 4, column=3, columnspan = 2, padx = 5, pady = 1) #High temp label
+Label(window, text="50*C/112*F").grid(row = 5, column=1, padx = 5, pady = 1) #High temp label
 s = ttk.Style()
 s.theme_use('clam')
 s.configure("red.Horizontal.TProgressbar", foreground='red', background='red')
 therm = ttk.Progressbar(window, style="red.Horizontal.TProgressbar", orient="vertical", length=200, mode="determinate", maximum=4, value=1) #Progress bar
-therm.grid(row=5, rowspan=4, column=3, columnspan = 2, padx=1, pady=1)
+therm.grid(row=6, rowspan=5, column=1, padx=1, pady=1)
 therm["maximum"] = 50
-Label(window, text="0*C/32*F").grid(row = 9, column=3, columnspan = 2, padx = 1, pady = 1) #Low temp label
+Label(window, text="0*C/32*F").grid(row = 11, column=1, padx = 1, pady = 1) #Low temp label
+
+#Average temperature label
+avgTempLabel = Label(window, text="Average Temperature: ")
+avgTempLabel.grid(row=12, column=1, sticky="W", padx=3, pady=3)
+
+#Average Temperature
+avgTempLabel = Label(window, text="0 *C")
+avgTempLabel.grid(row=12, column=1, sticky="E", padx=3, pady=3)
 
 startTempButton = Button(window, text="Start Reading", command=StartTemp)
 stopTempButton = Button(window, text="Stop Reading", command=stopTemp)
@@ -243,3 +274,5 @@ stopTempButton.grid(row=5, column=5, padx=5, pady=5)
 plotTempButton.grid(row=6, column=5, padx=5, pady=5)  # Opens a new window for plot data
 plotLumButton.grid(row=7, column=5, sticky="W", padx=5, pady=5)
 exitButton.grid(row=8, column=5, sticky="W", padx=5, pady=5, columnspan=3)
+
+window.mainloop()
