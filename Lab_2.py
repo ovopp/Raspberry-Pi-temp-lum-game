@@ -1,4 +1,5 @@
 from tkinter import *
+from tkinter import ttk
 import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
@@ -71,21 +72,25 @@ def getTemp():
                                                       100))  # Pushes the first element into Queue, replace with lm35.value
             lumQueue.pop()
             lumQueue.insert(0, random.randint(0, 100))
+            setTemp(temperatureQueue[0])
             if celcius:
-                tempLabel["text"] = str(temperatureQueue[0]) + " ℃"
+                tempLabel["text"] = str(temperatureQueue[0]) + "*C"
                 lumLabel["text"] = str(lumQueue[0])
-                avgTempLabel["text"] = str(round(sum(temperatureQueue.__iter__())/10)) + " ℃"
+                avgTempLabel["text"] = str(round(sum(temperatureQueue.__iter__())/10)) + "*C"
                 avgLumLabel["text"] = str(round(sum(lumQueue.__iter__())/10))
             else:
-                tempLabel["text"] = str(round(temperatureQueue[0] * 1.8 + 32)) + " ℉"
+                tempLabel["text"] = str(round(temperatureQueue[0] * 1.8 + 32)) + "*F"
                 lumLabel["text"] = str(lumQueue[0])
-                avgTempLabel["text"] = str(round(sum(temperatureQueue.__iter__()) / 10)) + " ℉"
+                avgTempLabel["text"] = str(round(sum(temperatureQueue.__iter__()) / 10)) + "*F"
                 avgLumLabel["text"] = str(round(sum(lumQueue.__iter__()) / 10))
 
             print("Temperature Queue: " + str(temperatureQueue))
             print("Luminescence Queue: " + str(lumQueue))
             time.sleep(float(readTime))
 
+#Sets the temperature value on the thermometer
+def setTemp(temp):
+    therm["value"]=temp
 
 # Initialization function for daemon thread to read values
 def __init__():
@@ -177,20 +182,38 @@ Label(window, text="Read Time:").grid(row=1, column=3, padx=5, pady=5)
 timeEntry = Entry(window)
 timeEntry.grid(row=1, column=4, padx=5, pady=5)
 
-Label(window, text="Current Temperature: ").grid(row=6, column=1, padx=3, pady=3)
 Label(window, text="Current Luminescence: ").grid(row=7, column=1, padx=3, pady=3)
-tempLabel = Label(window, text=str(temperatureQueue[0]) + " ℃")
-tempLabel.grid(row=6, column=2, padx=3, pady=3)
 lumLabel = Label(window, text=str(lumQueue[0]))
 lumLabel.grid(row=7, column=2, padx=3, pady=3)
-Button(window, text="C/F", command=celToFah).grid(row=6, column=3, padx=3, pady=3)
 
-Label(window, text="Average Temperature (Over 10 points): ").grid(row=8, column=1, padx=3, pady=3)
 Label(window, text="Average Luminescence (Over 10 points): ").grid(row=9, column=1, padx=3, pady=3)
-avgTempLabel = Label(window, text="0 ℃")
-avgTempLabel.grid(row=8, column=2, padx=3, pady=3)
 avgLumLabel = Label(window, text="0")
 avgLumLabel.grid(row=9, column=2, padx=3, pady=3)
+
+
+'''Temperature'''
+#Current Temperature
+Label(window, text="Current Temperature: ").grid(row=3, column=3, columnspan = 2, padx=3, pady=3) #Label
+tempLabel = Label(window, text=str(temperatureQueue[0]) + " ") #Temperature
+tempLabel.grid(row=6, column=4, padx=3, pady=3)
+
+#Unit button
+Button(window, text="C/F", command=celToFah).grid(row=6, column=4, columnspan = 2, padx=3, pady=3)
+
+#Average Temperature
+Label(window, text="Average Temperature (Over 10 points): ").grid(row=8, column=1, padx=3, pady=3)
+avgTempLabel = Label(window, text="0 *C")
+avgTempLabel.grid(row=8, column=2, padx=3, pady=3)
+
+#Thermometer
+Label(window, text="50*C/112*F").grid(row = 4, column=3, columnspan = 2, padx = 5, pady = 1) #High temp label
+s = ttk.Style()
+s.theme_use('clam')
+s.configure("red.Horizontal.TProgressbar", foreground='red', background='red')
+therm = ttk.Progressbar(window, style="red.Horizontal.TProgressbar", orient="vertical", length=200, mode="determinate", maximum=4, value=1) #Progress bar
+therm.grid(row=5, rowspan=4, column=3, columnspan = 2, padx=1, pady=1)
+therm["maximum"] = 50
+Label(window, text="0*C/32*F").grid(row = 9, column=3, columnspan = 2, padx = 1, pady = 1) #Low temp label
 
 getTimeButton = Button(window, text="Set Time", command=getTime, width=10).grid(row=1, column=5, padx=5, pady=5)
 
