@@ -139,6 +139,14 @@ def StartProgram():
     global start
     start = True
 
+def exitConfirm():
+    windowExit = Tk()
+    windowExit.title("Exit Program")
+    LabelExit = Label(windowExit, text="Close Program?").grid(row=0, column=1)
+    YesButton = Button(windowExit, text="Yes", command=exit).grid(row=1, column=1, sticky="E")
+    NoButton = Button(windowExit, text="No", command=windowExit.destroy).grid(row=1, column=2, sticky="W")
+
+
 
 # Initialization Variables
 readTime = 2
@@ -147,6 +155,9 @@ start = False
 celcius = True
 temperatureQueue = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 lumQueue = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+
+
+
 
 '''Program Starts Here'''
 StartWindow = Tk()
@@ -209,7 +220,7 @@ startTempButton = Button(window, text="Start Reading", command=StartTemp)
 stopTempButton = Button(window, text="Stop Reading", command=stopTemp)
 plotTempButton = Button(window, text="Temperature Plot", command=plotTemperature)
 plotLumButton = Button(window, text="Luminescence Plot", command=plotLuminescence)
-exitButton = Button(window, text="Exit", command=exit, width=20)
+exitButton = Button(window, text="Exit", command=exitConfirm, width=20)
 
 startTempButton.grid(row=4, column=5, padx=5, pady=5)
 stopTempButton.grid(row=5, column=5, padx=5, pady=5)
