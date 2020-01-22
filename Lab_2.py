@@ -3,7 +3,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
-from gpiozero import MCP3008
+#from gpiozero import MCP3008
 import threading
 import time
 import random
@@ -221,8 +221,15 @@ therm = ttk.Progressbar(window, style="red.Horizontal.TProgressbar", orient="ver
 therm.grid(row=5, rowspan=4, column=3, columnspan = 2, padx=1, pady=1)
 therm["maximum"] = 50
 Label(window, text="0*C/32*F").grid(row = 9, column=3, columnspan = 2, padx = 1, pady = 1) #Low temp label
+getTimeButton = Button(window, text="Set Time", command=getTime, width=10).grid(row=1, column=5, padx=5, pady=5)
 
-exitButton = Button(window, text="Exit", command=exitConfirm, width=20)
+startTempButton = Button(window, text="Start Reading", command=StartTemp, width=20)
+stopTempButton = Button(window, text="Stop Reading", command=stopTemp, width=20)
+
+plotTempButton = Button(window, text="Temperature Plot", command=plotTemperature, width=20) # Opens a new window for plot data
+plotLumButton = Button(window, text="Luminescence Plot", command=plotLuminescence, width=20)
+
+exitButton = Button(window, text="Exit", command=exit, width=20)
 
 startTempButton.grid(row=4, column=5, padx=5, pady=5)
 stopTempButton.grid(row=5, column=5, padx=5, pady=5)
