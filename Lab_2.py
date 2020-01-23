@@ -103,17 +103,62 @@ def __init__():
 
 #Function to open game window
 def startGame ():
-    GameWindow = Tk()
-    GameWindow.geometry("800x400")
-    GameWindow.title("Game")
+    GameMainWindow = Tk()
+    GameMainWindow.geometry("800x400")
+    GameMainWindow.title("Game")
+
+    #Game instructions
+    InstructionLabel = Label(GameMainWindow, text="INSTRUCTIONS", padx=5, pady=5, width=20, height=3)
+    InstructionLabel.grid(row=1, column=1)
     
-    GameWindow.mainloop()
+    Instruction1 = Label(GameMainWindow, text="You will be given a task you must accomplish in a specified time", padx=5, pady=5)
+    Instruction1.grid(row=2, column=1, sticky="W")
+    
+    Instruction2 = Label(GameMainWindow, text="If you complete the task your score will be increased and the next task will become harder", padx=5, pady=5)
+    Instruction2.grid(row=3, column=1, sticky="W")
+
+    Instruction3 = Label(GameMainWindow, text="If you don't complete the task your game will end and your score will be added to the leaderboard if it is high enough", padx=5, pady=5)
+    Instruction3.grid(row=4, column=1, sticky="W")
+
+    Instruction4 = Label(GameMainWindow, text="Possible tasks are: getting the temperature above or below a certain value or getting the light level above or below a certain value", padx=5, pady=5)
+    Instruction4.grid(row=5, column=1, sticky="W")
+
+    Instruction5 = Label(GameMainWindow, text="Press start to begin", padx=5, pady=5)
+    Instruction5.grid(row=6, column=1, sticky="W")
+
+    
+    #Start and quit button
+    gameStartButton = Button(GameMainWindow, text="Start", command=startLevel, width=20, height=3)
+    gameStartButton.grid(row=1, column=2, padx=5, pady=5)
+
+    quitGameButton = Button(GameMainWindow, text="Quit", command=quitGame, width=20, height=3)
+    quitGameButton.grid(row=2, column=2, padx=5, pady=5)
+
+    
+    #Highscores
+    HighscoreLabel = Label(GameMainWindow, text="HIGH SCORES", padx=5, pady=5, width=20, height=3)
+    HighscoreLabel.grid(row=1, column=3)
+
+    highscores = [5, 5, 5, 5, 5]
+    Label(GameMainWindow, text="Name", padx=5, pady=5).grid(row=2, column=3, sticky="W")
+    Label(GameMainWindow, text="Score", padx=5, pady=5).grid(row=2, column=3, sticky="E")
+    for highscore in range(len(highscores)):
+        Label(GameMainWindow, text="Name", padx=5, pady=5).grid(row=3+highscore, column=3, sticky="W")
+        Label(GameMainWindow, text="Score", padx=5, pady=5).grid(row=3+highscore, column=3, sticky="E")
+    
+    GameMainWindow.mainloop()
+
+#Starts next game level
+def startLevel():
+    return
+
+def quitGame():
+    return
 
 # Function to start and stop daemon thread readout
 def StartTemp():
     global readTemp
     readTemp = True
-
 
 def stopTemp():
     global readTemp
