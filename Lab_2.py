@@ -181,7 +181,7 @@ if not start:
 
 window = Tk()
 
-window.geometry("800x450")
+window.geometry("750x400")
 __init__()  # Initializes a daemon thread to read values off sensors (runs in the background, collects data)
 window.title("Group 20's Temperature and Light Sensor Program")  # sets title
 
@@ -237,14 +237,14 @@ getTimeButton = Button(window, text="Set Time", command=getTime, width=10).grid(
 startTempButton = Button(window, text="Start Reading", command=StartTemp, width=20)
 stopTempButton = Button(window, text="Stop Reading", command=stopTemp, width=20)
 
-plotTempButton = Button(window, text="Plots", command=plotOnOff,
+plotButton = Button(window, text="Plots ON / OFF", command=plotOnOff,
                         width=20)  # Opens a new window for plot data
 
 exitButton = Button(window, text="Exit", command=exit, width=20)
 
 startTempButton.grid(row=4, column=5, padx=5, pady=5)
 stopTempButton.grid(row=5, column=5, padx=5, pady=5)
-plotTempButton.grid(row=6, column=5, padx=5, pady=5)  # Opens a new window for plot data
+plotButton.grid(row=6, column=5, padx=5, pady=5)  # Opens a new window for plot data
 exitButton.grid(row=8, column=5, sticky="W", padx=5, pady=5, columnspan=3)
 
 window.mainloop()
