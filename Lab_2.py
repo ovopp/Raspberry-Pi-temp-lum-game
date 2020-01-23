@@ -208,17 +208,18 @@ def startGame():
 def startLevel():
     gamestart = Tk()
     tasktype = random.randint(0,1)
+    level = 1
     if (tasktype == 0):
         goalTemp = Label(gamestart, text="Your goal temperature: ")
         goalTemp.grid(row=1, column=1)
-        goalTemp1 = Label(gamestart, text=random.randint(0,100))
+        goalTemp1 = Label(gamestart, text=random.randint(level*5, level*10))
         goalTemp1.grid(row=1, column=2)
         currTempGame = Label(gamestart, text="Temperature: ")
         currTempGame.grid(row=2, column=1, padx=3, pady=3)
     else:
         goalLum = Label(gamestart, text="Your goal luminescence: ")
         goalLum.grid(row=1, column=1)
-        goalLum1 = Label(gamestart, text=random.randint(0,255))
+        goalLum1 = Label(gamestart, text=random.randint(level*10, level*30))
         goalLum1.grid(row=1, column=2)
         currLumGame = Label(gamestart, text="Luminescence: ")
         currLumGame.grid(row=2, column=1, padx=3, pady=3)
