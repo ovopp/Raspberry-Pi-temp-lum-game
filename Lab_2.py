@@ -171,9 +171,10 @@ def startGame():
     HighscoreLabel = Label(GameMainWindow, text="HIGH SCORES", padx=5, pady=5, width=20, height=3)
     HighscoreLabel.grid(row=1, column=3)
 
+    highscores = [5, 5, 5, 5, 5]
     Label(GameMainWindow, text="Name", padx=5, pady=5).grid(row=2, column=3, sticky="W")
     Label(GameMainWindow, text="Score", padx=5, pady=5).grid(row=2, column=3, sticky="E")
-
+    
     with open('HighScore.csv', 'r') as readHighScore:
         csv1 = csv.reader(readHighScore, delimiter=",")
         sort = sorted(csv1, key=lambda x: int(x[1]), reverse=True)
@@ -184,7 +185,7 @@ def startGame():
             highscorerank += 1
             if highscorerank >= 5:
                 break
-
+    
     # Countdown Module
     countdownLabel = Label(GameMainWindow, text=countdownTime)
     countdownLabel.grid()
