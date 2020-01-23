@@ -248,6 +248,19 @@ therm = ttk.Progressbar(window, style="red.Horizontal.TProgressbar", orient="ver
 therm.grid(row=5, rowspan=4, column=3, columnspan=2, padx=1, pady=1)
 therm["maximum"] = 50
 Label(window, text="0*C/32*F").grid(row=9, column=3, columnspan=2, padx=1, pady=1)  # Low temp label
+                                          
+# Light meter
+Label(window, text="255").grid(row=5, column=3, padx=5, pady=1)  # High temp label
+s = ttk.Style()
+s.theme_use('clam')
+s.configure("yellow.Horizontal.TProgressbar", foreground='black', background='yellow')
+lightMeter = ttk.Progressbar(window, style="yellow.Horizontal.TProgressbar", orient="vertical", length=200,
+                             mode="determinate", maximum=4, value=1)  # Progress bar
+lightMeter.grid(row=6, rowspan=5, column=3, padx=5, pady=1)
+lightMeter["maximum"] = 255
+Label(window, text="0").grid(row=11, column=3, padx=5, pady=1)  # Low temp label                                          
+                                          
+                                          
 getTimeButton = Button(window, text="Set Time", command=getTime, width=10).grid(row=1, column=5, padx=5, pady=5)
 
 startTempButton = Button(window, text="Start Reading", command=StartTemp, width=20)
