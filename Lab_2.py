@@ -120,6 +120,8 @@ def startGame():
     def submitScore():
         with open('HighScore.csv', 'a') as file:
             file.write("\n" + str(entry.get()) + "," + str(score))
+        file.close()
+        UpdateLeaderboard()
 
     def countdown(t):
         countdownLabel['text'] = t
@@ -128,9 +130,24 @@ def startGame():
         else:
             countdownLabel['text'] = "Time's Up!"
 
+    def UpdateLeaderboard():
+        with open('HighScore.csv', 'r') as readHighScore:
+            csv1 = csv.reader(readHighScore, delimiter=",")
+            sort = sorted(csv1, key=lambda x: int(x[1]), reverse=True)
+            highscorerank = 0
+            for row in sort:
+                Label(GameMainWindow, text=str(row[0]), padx=5, pady=5).grid(row=3 + highscorerank, column=3, sticky="W")
+                Label(GameMainWindow, text=str(row[1]), padx=5, pady=5).grid(row=3 + highscorerank, column=3, sticky="E")
+                highscorerank += 1
+                if highscorerank >= 5:
+                    break
+
     GameMainWindow = Tk()
     GameMainWindow.geometry("800x400")
     GameMainWindow.title("Game")
+    for i in range(10):
+        GameMainWindow.columnconfigure(i, weight=1)
+        GameMainWindow.rowconfigure(i, weight=1)
     score = 0
     countdownTime = 10
 
@@ -140,25 +157,25 @@ def startGame():
 
     Instruction1 = Label(GameMainWindow, text="You will be given a task you must accomplish in a specified time",
                          padx=5, pady=5)
-    Instruction1.grid(row=2, column=1, sticky="W")
+    Instruction1.grid(row=2, column=1)
 
     Instruction2 = Label(GameMainWindow,
-                         text="If you complete the task your score will be increased and the next task will become harder",
+                         text="If you complete the task your score will be increased and the next\n task will become harder",
                          padx=5, pady=5)
-    Instruction2.grid(row=3, column=1, sticky="W")
+    Instruction2.grid(row=3, column=1)
 
     Instruction3 = Label(GameMainWindow,
-                         text="If you don't complete the task your game will end and your score will be added to the leaderboard if it is high enough",
+                         text="If you don't complete the task your game will end and your score\n will be added to the leaderboard if it is high enough",
                          padx=5, pady=5)
-    Instruction3.grid(row=4, column=1, sticky="W")
+    Instruction3.grid(row=4, column=1)
 
     Instruction4 = Label(GameMainWindow,
-                         text="Possible tasks are: getting the temperature above or below a certain value or getting the light level above or below a certain value",
+                         text="Possible tasks are: getting the temperature above or below a certain\n value or getting the light level above or below a certain value",
                          padx=5, pady=5)
-    Instruction4.grid(row=5, column=1, sticky="W")
+    Instruction4.grid(row=5, column=1)
 
     Instruction5 = Label(GameMainWindow, text="Press start to begin", padx=5, pady=5)
-    Instruction5.grid(row=6, column=1, sticky="W")
+    Instruction5.grid(row=6, column=1)
 
     # Start and quit button
     gameStartButton = Button(GameMainWindow, text="Start", command=startLevel, width=20, height=3)
@@ -174,10 +191,8 @@ def startGame():
     highscores = [5, 5, 5, 5, 5]
     Label(GameMainWindow, text="Name", padx=5, pady=5).grid(row=2, column=3, sticky="W")
     Label(GameMainWindow, text="Score", padx=5, pady=5).grid(row=2, column=3, sticky="E")
-    for highscore in range(len(highscores)):
-        Label(GameMainWindow, text="Name", padx=5, pady=5).grid(row=3 + highscore, column=3, sticky="W")
-        Label(GameMainWindow, text="Score", padx=5, pady=5).grid(row=3 + highscore, column=3, sticky="E")
-
+    UpdateLeaderboard()
+    
     # Countdown Module
     countdownLabel = Label(GameMainWindow, text=countdownTime)
     countdownLabel.grid()
@@ -191,7 +206,25 @@ def startGame():
 
 # Starts next game level
 def startLevel():
-    return
+    gamestart = Tk()
+    tasktype = random.randint(0,1)
+    level = 1
+    if (tasktype == 0):
+        goalTemp = Label(gamestart, text="Your goal temperature: ")
+        goalTemp.grid(row=1, column=1)
+        goalTemp1 = Label(gamestart, text=random.randint(level*5, level*10))
+        goalTemp1.grid(row=1, column=2)
+        currTempGame = Label(gamestart, text="Temperature: ")
+        currTempGame.grid(row=2, column=1, padx=3, pady=3)
+    else:
+        goalLum = Label(gamestart, text="Your goal luminescence: ")
+        goalLum.grid(row=1, column=1)
+        goalLum1 = Label(gamestart, text=random.randint(level*10, level*30))
+        goalLum1.grid(row=1, column=2)
+        currLumGame = Label(gamestart, text="Luminescence: ")
+        currLumGame.grid(row=2, column=1, padx=3, pady=3)
+
+    
 
 
 def quitGame():
@@ -412,3 +445,4 @@ gameButton.grid(row=7, column=5, sticky="W", padx=5, pady=5, columnspan=3)
 exitButton.grid(row=8, column=5, sticky="W", padx=5, pady=5, columnspan=3)
 
 window.mainloop()
+
