@@ -1,22 +1,10 @@
 from tkinter import *
-import matplotlib
 import matplotlib.pyplot as plt
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-from matplotlib.figure import Figure
 # from gpiozero import MCP3008
 import threading
 import time
 import random
 from tkinter import ttk
-
-'''spidev module and code to read'''
-# import spidev
-# spi = spidev.SpiDev()
-# spi.open(0,0)
-# spi.max.speed_hz = 5000
-# channel = 0
-# adc = spi.xfer2([1, (8+channel)<<4,0]) # read from channel 0
-# data = ((adc[1]& 3) << 8) + adc[2] # form the 10 bit read value
 
 # photocell = MCP3008(0)
 # print(photocell.value)
@@ -27,37 +15,47 @@ from tkinter import ttk
 '''Functions for buttons and initializations'''
 
 
+def plotOnOff():
+    global plotVar
+    if plotVar:
+        plotVar = False
+    else:
+        plotVar = True
+
+
 # Function for plot button
-def plotTemperature():
-    plt.close()
-    sum = 0
-    for i in temperatureQueue:
-        sum += i
-    avgTemp = sum / 10
-    avgQueue = [avgTemp] * 10
-    plt.plot([0, 1, 2, 3, 4, 5, 6, 7, 8, 9], temperatureQueue)
-    plt.ylabel("Temperature (Celcius)")
-    plt.xlabel("Last 10 readings")
-    plt.title("Temperature Plot")
-    plt.plot([0, 1, 2, 3, 4, 5, 6, 7, 8, 9], avgQueue, label='Average Temperature')
-    plt.legend(loc="upper left")
-    plt.show()
-
-
-def plotLuminescence():
-    plt.close()
-    sum = 0
-    for i in lumQueue:
-        sum += i
-    avgLum = sum / 10
-    avgQueue = [avgLum] * 10
-    plt.plot([0, 1, 2, 3, 4, 5, 6, 7, 8, 9], temperatureQueue)
-    plt.ylabel("Luminescence (Lum)")
-    plt.xlabel("Last 10 readings")
-    plt.title("Luminescence Plot")
-    plt.plot([0, 1, 2, 3, 4, 5, 6, 7, 8, 9], avgQueue, label='Average Luminescence')
-    plt.legend(loc="upper left")
-    plt.show()
+def plotTempandLum():
+    global plotVar
+    while True:
+        try:
+            while plotVar:
+                tmpRev = list(reversed(temperatureQueue))
+                lumRev = list(reversed(lumQueue))
+                color = 'tab:red'
+                color2 = 'tab:blue'
+                fig = plt.figure()
+                ax = fig.add_subplot(111)
+                plt.title("Temperature and Luminescence Plot")
+                Ln, = ax.plot(tmpRev)
+                ax.set_xlim([0, 10])
+                ax.set_ylim([0, 100])
+                ax.set_xlabel('Readings')
+                ax.set_ylabel('Temperature (*C)', color=color2)
+                ax2 = ax.twinx()
+                ax2.set_ylabel('Luminescence', color=color)
+                ax2.set_ylim([0, 255])
+                Ln2, = ax2.plot(lumRev, color=color)
+                plt.ion()
+                while plotVar:
+                    plt.show()
+                    Ln.set_ydata(list(reversed(temperatureQueue)))
+                    Ln2.set_ydata(list(reversed(lumQueue)))
+                    Ln.set_xdata(range(len(temperatureQueue)))
+                    Ln2.set_xdata(range(len(temperatureQueue)))
+                    plt.pause(0.1)
+                plt.close()
+        except TclError:
+            plotVar = False
 
 
 # Change the values to values of the photocell and lm 35 data
@@ -67,39 +65,52 @@ def getTempLum():
     global lumQueue
     while True:
         while readTemp:
-            temperatureQueue.pop()  # Pops the last element
-            temperatureQueue.insert(0, random.randint(0,
-                                                      100))  # Pushes the first element into Queue, replace with lm35.value
-            lumQueue.pop()
-            lumQueue.insert(0, random.randint(0, 100))
-            setTemp(temperatureQueue[0])
-            setLight(lumQueue[0])
+            if len(temperatureQueue) < 10:
+                temperatureQueue.insert(0, random.randint(0, 100))
+                lumQueue.insert(0, random.randint(0, 255))
+                setTemp(temperatureQueue[0])
+                setLight(lumQueue[0])
+            else:
+                temperatureQueue.pop()  # Pops the last element
+                temperatureQueue.insert(0, random.randint(0,
+                                                          100))  # Pushes the first element into Queue, replace with
+                # lm35.value
+                lumQueue.pop()
+                lumQueue.insert(0, random.randint(0, 100))
+                setTemp(temperatureQueue[0])
+                setLight(lumQueue[0])
             if celcius:
                 tempLabel["text"] = str(temperatureQueue[0]) + " *C"
-                avgTempLabel["text"] = str(round(sum(temperatureQueue.__iter__())/len([i for i in temperatureQueue if i != 0]))) + " *C"
+                lumLabel["text"] = str(lumQueue[0])
+                avgTempLabel["text"] = str(round(sum(temperatureQueue.__iter__()) / len(lumQueue))) + " *C"
+                avgLumLabel["text"] = str(round(sum(lumQueue.__iter__()) / len(lumQueue)))
+                time.sleep(float(readTime))
             else:
                 tempLabel["text"] = str(round(temperatureQueue[0] * 1.8 + 32)) + " *F"
-                avgTempLabel["text"] = str(round(1.8*sum(temperatureQueue.__iter__()) / len([i for i in temperatureQueue if i != 0]) + 32)) + " *F"
-            lumLabel["text"] = str(lumQueue[0])
-            avgLumLabel["text"] = str(round(sum(lumQueue.__iter__()) / len([i for i in lumQueue if i != 0])))
+                lumLabel["text"] = str(lumQueue[0])
+                avgTempLabel["text"] = str(round(sum(temperatureQueue.__iter__()) / len(lumQueue))) + " *F"
+                avgLumLabel["text"] = str(round(sum(lumQueue.__iter__()) / len(lumQueue)))
+                time.sleep(float(readTime))
 
-            print("Temperature Queue: " + str(temperatureQueue))
-            print("Luminescence Queue: " + str(lumQueue))
-            time.sleep(float(readTime))
 
-#Sets the temperature value on the thermometer
+# Sets the temperature value on the thermometer
 def setTemp(temp):
-    therm["value"]=temp
+    therm["value"] = temp
 
-#Sets the light level on the light meter
+
+# Sets the light level on the light meter
 def setLight(lightLevel):
-    lightMeter["value"]=lightLevel
+    lightMeter["value"] = lightLevel
+
 
 # Initialization function for daemon thread to read values
 def __init__():
     thread = threading.Thread(target=getTempLum, args=())
     thread.daemon = True
     thread.start()
+    thread2 = threading.Thread(target=plotTempandLum, args=())
+    thread2.daemon = True
+    thread2.start()
 
 
 # Function to start and stop daemon thread readout
@@ -115,19 +126,19 @@ def stopTemp():
 
 def celToFah():
     global celcius
-    #if ce
+    # if ce
     if celcius:
         celcius = False
         highTempLabel["text"] = "112 *F"
         lowTempLabel["text"] = "32 *F"
         tempLabel["text"] = str(round(temperatureQueue[0] * 1.8 + 32)) + " *F"
-        avgTempLabel["text"] = str(round(1.8*sum(temperatureQueue.__iter__()) / 10 + 32)) + " *F"
+        avgTempLabel["text"] = str(round(1.8 * sum(temperatureQueue.__iter__()) / 10 + 32)) + " *F"
     else:
         celcius = True
         highTempLabel["text"] = "50 *C"
         lowTempLabel["text"] = "0 *C"
         tempLabel["text"] = str(temperatureQueue[0]) + " *C"
-        avgTempLabel["text"] = str(round(sum(temperatureQueue.__iter__())/10)) + " *C"
+        avgTempLabel["text"] = str(round(sum(temperatureQueue.__iter__()) / 10)) + " *C"
 
 
 # Updates readTime variable with Entry information. Throws and handles incorrect inputs
@@ -156,6 +167,7 @@ def StartProgram():
     global start
     start = True
 
+
 def exitConfirm():
     windowExit = Tk()
     windowExit.title("Exit Program")
@@ -165,17 +177,20 @@ def exitConfirm():
     no = HoverButton(windowExit, text="No", command=windowExit.destroy)
     no.grid(row=1, column=2, sticky="W")
 
+
 # Initialization Variables
 readTime = 2
 readTemp = False
 start = False
 celcius = True
-temperatureQueue = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-lumQueue = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+plotVar = False
+temperatureQueue = [0]
+lumQueue = [0]
+
 
 class HoverButton(Button):
     def __init__(self, master, **kw):
-        Button.__init__(self,master=master,**kw)
+        Button.__init__(self, master=master, **kw)
         self.defaultBackground = self["background"]
         self['activebackground'] = 'light gray'
         self.bind("<Enter>", self.on_enter)
@@ -186,6 +201,7 @@ class HoverButton(Button):
 
     def on_leave(self, e):
         self['background'] = self.defaultBackground
+
 
 '''Program Starts Here'''
 StartWindow = Tk()
@@ -202,15 +218,13 @@ if not start:
 
 window = Tk()
 window.geometry("800x550")
-
-__init__()  # Initializes a daemon thread to read values off sensors (runs in the background, collects data)
-matplotlib.use('TkAgg')
+__init__()  # Initializes two daemon threads to read values off sensors (runs in the background, collects data)
 window.title("Group 20's Temperature and Light Sensor Program")  # sets title
 for i in range(10):
     window.columnconfigure(i, weight=1)
     window.rowconfigure(i, weight=1)
 
-welcome = Label(window, text="Welcome to our program!", fg = "blue", font=("Calibri", 25))
+welcome = Label(window, text="Welcome to our program!", fg="blue", font=("Calibri", 25))
 welcome.grid(row=0, column=2, columnspan=2, padx=5, pady=20)
 
 start = Label(window, text="To start sensor reading, set a read time \n(default is 2 seconds) and press Start Reading")
@@ -228,12 +242,12 @@ getTimeButton = Button(window, text="Set Time", command=getTime)
 getTimeButton.grid(row=3, column=2, sticky="W", padx=5, pady=5)
 
 '''Liminescence'''
-#Current luminenscence label
+# Current luminenscence label
 currLum = Label(window, text="Luminescence: ")
 currLum.grid(row=4, column=3, padx=3, pady=3)
 
-#Current luminenscence
-lumLabel = Label(window, text=str(lumQueue[0]))
+# Current luminenscence
+lumLabel = Label(window, text=" ")
 lumLabel.grid(row=7, column=3, sticky="E", padx=60, pady=3)
 
 convertCF = HoverButton(window, text="C/F", command=celToFah)
@@ -241,46 +255,47 @@ convertCF.grid(row=6, column=2, sticky="W", padx=3, pady=3)
 getTimeButton = HoverButton(window, text="Set Time", command=getTime)
 getTimeButton.grid(row=3, column=2, sticky="W", padx=5, pady=5)
 
-#Light meter
-Label(window, text="255").grid(row = 5, column=3, padx = 5, pady = 1) #High temp label
+# Light meter
+Label(window, text="255").grid(row=5, column=3, padx=5, pady=1)  # High temp label
 s = ttk.Style()
 s.theme_use('clam')
 s.configure("yellow.Horizontal.TProgressbar", foreground='black', background='yellow')
-lightMeter = ttk.Progressbar(window, style="yellow.Horizontal.TProgressbar", orient="vertical", length=200, mode="determinate", maximum=4, value=1) #Progress bar
+lightMeter = ttk.Progressbar(window, style="yellow.Horizontal.TProgressbar", orient="vertical", length=200,
+                             mode="determinate", maximum=4, value=1)  # Progress bar
 lightMeter.grid(row=6, rowspan=5, column=3, padx=5, pady=1)
 lightMeter["maximum"] = 255
-Label(window, text="0").grid(row = 11, column=3, padx = 5, pady = 1) #Low temp label
+Label(window, text="0").grid(row=11, column=3, padx=5, pady=1)  # Low temp label
 
-#Average luminenscence label
+# Average Luminescence label
 avgLumLabel = Label(window, text="Average Luminescence: ")
 avgLumLabel.grid(row=12, column=3, sticky="W", padx=10, pady=3)
 
-#Average luminenscence
+# Average luminenscence
 avgLumLabel = Label(window, text="0")
 avgLumLabel.grid(row=12, column=3, sticky="E", padx=10, pady=3)
 
-
 '''Temperature'''
-#Current temperature label
+# Current temperature label
 currTemp = Label(window, text="Temperature: ")
 currTemp.grid(row=4, column=1, padx=3, pady=3)
 
-#Current temerature
-tempLabel = Label(window, text=str(temperatureQueue[0]) + " *C")
+# Current temerature
+tempLabel = Label(window, text=" *")
 tempLabel.grid(row=7, column=1, sticky="E", padx=60, pady=3)
 
-#Thermometer
-highTempLabel = Label(window, text="50 *C") #High temp label
-highTempLabel.grid(row = 5, column=1, padx = 5, pady = 1)
+# Thermometer
+highTempLabel = Label(window, text="50 *C")  # High temp label
+highTempLabel.grid(row=5, column=1, padx=5, pady=1)
 
 s = ttk.Style()
 s.theme_use('clam')
 s.configure("red.Horizontal.TProgressbar", foreground='red', background='red')
-therm = ttk.Progressbar(window, style="red.Horizontal.TProgressbar", orient="vertical", length=200, mode="determinate", maximum=4, value=1) #Progress bar
+therm = ttk.Progressbar(window, style="red.Horizontal.TProgressbar", orient="vertical", length=200, mode="determinate",
+                        maximum=4, value=1)  # Progress bar
 therm.grid(row=6, rowspan=5, column=1, padx=1, pady=1)
 therm["maximum"] = 50
 
-Label(window, text="0*C/32*F").grid(row = 9, column=1, columnspan = 2, padx = 1, pady = 1) #Low temp label
+Label(window, text="0*C/32*F").grid(row=9, column=1, columnspan=2, padx=1, pady=1)  # Low temp label
 
 startTempButton = HoverButton(window, text="Start Reading", command=StartTemp, width=20)
 startTempButton.grid(row=4, column=5, padx=5, sticky="W", pady=5)
@@ -289,23 +304,21 @@ stopTempButton = HoverButton(window, text="Stop Reading", command=stopTemp, widt
 stopTempButton.grid(row=5, column=5, padx=5, sticky="W", pady=5)
 
 # Opens a new window for plot data
-plotTempButton = HoverButton(window, text="Temperature Plot", command=plotTemperature, width=20)
-plotTempButton.grid(row=6, column=5, padx=5, sticky="W", pady=5)
+plotButton = HoverButton(window, text="Plots ON / OFF", command=plotOnOff, width=20)
+plotButton.grid(row=6, column=5, padx=5, sticky="W", pady=5)
 
-lowTempLabel = Label(window, text="0 *C") #Low temp label
-lowTempLabel.grid(row = 11, column=1, padx = 1, pady = 1) 
+lowTempLabel = Label(window, text="0 *C")  # Low temp label
+lowTempLabel.grid(row=11, column=1, padx=1, pady=1)
 
-#Average temperature label
+# Average temperature label
 avgTempLabel = Label(window, text="Average Temperature: ")
 avgTempLabel.grid(row=12, column=1, sticky="W", padx=3, pady=3)
 
-#Average Temperature
+# Average Temperature
 avgTempLabel = Label(window, text="0 *C")
 avgTempLabel.grid(row=12, column=1, sticky="E", padx=10, pady=3)
 
 stopTempButton = HoverButton(window, text="Stop Reading", command=stopTemp, width=20)
-plotLumButton = HoverButton(window, text="Luminescence Plot", command=plotLuminescence, width=20)
-plotLumButton.grid(row=7, column=5, sticky="W", padx=5, pady=5)
 exitButton = HoverButton(window, text="Exit", command=exitConfirm, width=20)
 exitButton.grid(row=8, column=5, sticky="W", padx=5, pady=5, columnspan=3)
 
