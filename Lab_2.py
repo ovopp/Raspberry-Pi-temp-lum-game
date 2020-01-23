@@ -159,7 +159,6 @@ def StartProgram():
 def exitConfirm():
     windowExit = Tk()
     windowExit.title("Exit Program")
-
     Label(windowExit, text="Close Program?").grid(row=0, column=1)
     yes = HoverButton(windowExit, text="Yes", command=exit)
     yes.grid(row=1, column=1, sticky="E")
@@ -202,30 +201,14 @@ if not start:
 '''Start of the main program'''
 
 window = Tk()
-window.geometry("750x400")
+window.geometry("800x550")
 
 __init__()  # Initializes a daemon thread to read values off sensors (runs in the background, collects data)
 matplotlib.use('TkAgg')
 window.title("Group 20's Temperature and Light Sensor Program")  # sets title
-window.columnconfigure(0, weight=1)
-window.rowconfigure(0, weight=1)
-window.columnconfigure(1, weight=1)
-window.rowconfigure(1, weight=1)
-window.columnconfigure(2, weight=1)
-window.rowconfigure(2, weight=1)
-window.columnconfigure(3, weight=1)
-window.rowconfigure(3, weight=1)
-window.columnconfigure(4, weight=1)
-window.rowconfigure(4, weight=1)
-window.columnconfigure(5, weight=1)
-window.rowconfigure(5, weight=1)
-window.columnconfigure(6, weight=1)
-window.rowconfigure(6, weight=1)
-window.columnconfigure(7, weight=1)
-window.rowconfigure(7, weight=1)
-window.columnconfigure(8, weight=1)
-window.rowconfigure(8, weight=1)
-
+for i in range(10):
+    window.columnconfigure(i, weight=1)
+    window.rowconfigure(i, weight=1)
 
 welcome = Label(window, text="Welcome to our program!", fg = "blue", font=("Calibri", 25))
 welcome.grid(row=0, column=2, columnspan=2, padx=5, pady=20)
@@ -234,13 +217,6 @@ start = Label(window, text="To start sensor reading, set a read time \n(default 
 start.grid(row=2, column=1, sticky="W")
 
 blank = Label(window, text="\n\n").grid(row=1, column=1)
-
-
-currTemp = Label(window, text="Current Temperature: ")
-currTemp.grid(row=6, column=1, sticky="W", padx=3, pady=3)
-
-currLum = Label(window, text="Current Luminescence: ")
-currLum.grid(row=7, column=1, sticky="W", padx=3, pady=3)
 
 timeLabel = Label(window, text="Read Time:")
 timeLabel.grid(row=3, column=1, sticky="W", padx=5, pady=5)
@@ -260,12 +236,11 @@ currLum.grid(row=4, column=3, padx=3, pady=3)
 lumLabel = Label(window, text=str(lumQueue[0]))
 lumLabel.grid(row=7, column=3, sticky="E", padx=60, pady=3)
 
-
 convertCF = HoverButton(window, text="C/F", command=celToFah)
 convertCF.grid(row=6, column=2, sticky="W", padx=3, pady=3)
 getTimeButton = HoverButton(window, text="Set Time", command=getTime)
 getTimeButton.grid(row=3, column=2, sticky="W", padx=5, pady=5)
-=======
+
 #Light meter
 Label(window, text="255").grid(row = 5, column=3, padx = 5, pady = 1) #High temp label
 s = ttk.Style()
@@ -294,12 +269,7 @@ currTemp.grid(row=4, column=1, padx=3, pady=3)
 tempLabel = Label(window, text=str(temperatureQueue[0]) + " *C")
 tempLabel.grid(row=7, column=1, sticky="E", padx=60, pady=3)
 
-#CF button
-convertCF = Button(window, text="C/F", command=celToFah)
-convertCF.grid(row=7, column=1, sticky="E", padx=25, pady=3)
-
 #Thermometer
-
 highTempLabel = Label(window, text="50 *C") #High temp label
 highTempLabel.grid(row = 5, column=1, padx = 5, pady = 1)
 
@@ -310,7 +280,7 @@ therm = ttk.Progressbar(window, style="red.Horizontal.TProgressbar", orient="ver
 therm.grid(row=6, rowspan=5, column=1, padx=1, pady=1)
 therm["maximum"] = 50
 
-Label(window, text="0*C/32*F").grid(row = 9, column=3, columnspan = 2, padx = 1, pady = 1) #Low temp label
+Label(window, text="0*C/32*F").grid(row = 9, column=1, columnspan = 2, padx = 1, pady = 1) #Low temp label
 
 startTempButton = HoverButton(window, text="Start Reading", command=StartTemp, width=20)
 startTempButton.grid(row=4, column=5, padx=5, sticky="W", pady=5)
@@ -321,7 +291,6 @@ stopTempButton.grid(row=5, column=5, padx=5, sticky="W", pady=5)
 # Opens a new window for plot data
 plotTempButton = HoverButton(window, text="Temperature Plot", command=plotTemperature, width=20)
 plotTempButton.grid(row=6, column=5, padx=5, sticky="W", pady=5)
-=======
 
 lowTempLabel = Label(window, text="0 *C") #Low temp label
 lowTempLabel.grid(row = 11, column=1, padx = 1, pady = 1) 
@@ -332,7 +301,7 @@ avgTempLabel.grid(row=12, column=1, sticky="W", padx=3, pady=3)
 
 #Average Temperature
 avgTempLabel = Label(window, text="0 *C")
-avgTempLabel.grid(row=12, column=1, sticky="E", padx=3, pady=3)
+avgTempLabel.grid(row=12, column=1, sticky="E", padx=10, pady=3)
 
 stopTempButton = HoverButton(window, text="Stop Reading", command=stopTemp, width=20)
 plotLumButton = HoverButton(window, text="Luminescence Plot", command=plotLuminescence, width=20)
