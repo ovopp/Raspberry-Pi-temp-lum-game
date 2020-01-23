@@ -120,7 +120,8 @@ def startGame():
     def submitScore():
         with open('HighScore.csv', 'a') as file:
             file.write("\n" + str(entry.get()) + "," + str(score))
-            UpdateLeaderboard()
+        file.close()
+        UpdateLeaderboard()
 
     def countdown(t):
         countdownLabel['text'] = t
