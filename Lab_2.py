@@ -114,10 +114,95 @@ def __init__():
     thread2.daemon = True
     thread2.start()
 
+
+# Function to open game window
+def startGame():
+    def submitScore():
+        with open('HighScore.csv', 'a') as file:
+            file.write("\n" + str(entry.get()) + "," + str(score))
+
+    def countdown(t):
+        countdownLabel['text'] = t
+        if t > 0:
+            GameMainWindow.after(100, countdown, round(t - 0.1, 1))
+        else:
+            countdownLabel['text'] = "Time's Up!"
+
+    GameMainWindow = Tk()
+    GameMainWindow.geometry("800x400")
+    GameMainWindow.title("Game")
+    score = 0
+    countdownTime = 10
+
+    # Game instructions
+    InstructionLabel = Label(GameMainWindow, text="INSTRUCTIONS", padx=5, pady=5, width=20, height=3)
+    InstructionLabel.grid(row=1, column=1)
+
+    Instruction1 = Label(GameMainWindow, text="You will be given a task you must accomplish in a specified time",
+                         padx=5, pady=5)
+    Instruction1.grid(row=2, column=1, sticky="W")
+
+    Instruction2 = Label(GameMainWindow,
+                         text="If you complete the task your score will be increased and the next task will become harder",
+                         padx=5, pady=5)
+    Instruction2.grid(row=3, column=1, sticky="W")
+
+    Instruction3 = Label(GameMainWindow,
+                         text="If you don't complete the task your game will end and your score will be added to the leaderboard if it is high enough",
+                         padx=5, pady=5)
+    Instruction3.grid(row=4, column=1, sticky="W")
+
+    Instruction4 = Label(GameMainWindow,
+                         text="Possible tasks are: getting the temperature above or below a certain value or getting the light level above or below a certain value",
+                         padx=5, pady=5)
+    Instruction4.grid(row=5, column=1, sticky="W")
+
+    Instruction5 = Label(GameMainWindow, text="Press start to begin", padx=5, pady=5)
+    Instruction5.grid(row=6, column=1, sticky="W")
+
+    # Start and quit button
+    gameStartButton = Button(GameMainWindow, text="Start", command=startLevel, width=20, height=3)
+    gameStartButton.grid(row=1, column=2, padx=5, pady=5)
+
+    quitGameButton = Button(GameMainWindow, text="Quit", command=quitGame, width=20, height=3)
+    quitGameButton.grid(row=2, column=2, padx=5, pady=5)
+
+    # Highscores
+    HighscoreLabel = Label(GameMainWindow, text="HIGH SCORES", padx=5, pady=5, width=20, height=3)
+    HighscoreLabel.grid(row=1, column=3)
+
+    highscores = [5, 5, 5, 5, 5]
+    Label(GameMainWindow, text="Name", padx=5, pady=5).grid(row=2, column=3, sticky="W")
+    Label(GameMainWindow, text="Score", padx=5, pady=5).grid(row=2, column=3, sticky="E")
+    for highscore in range(len(highscores)):
+        Label(GameMainWindow, text="Name", padx=5, pady=5).grid(row=3 + highscore, column=3, sticky="W")
+        Label(GameMainWindow, text="Score", padx=5, pady=5).grid(row=3 + highscore, column=3, sticky="E")
+
+    # Countdown Module
+    countdownLabel = Label(GameMainWindow, text=countdownTime)
+    countdownLabel.grid()
+    Button(GameMainWindow, text="Countdown Start!", command=lambda: countdown(countdownTime)).grid()
+    entry = Entry(GameMainWindow)
+    entry.grid()
+    Button(GameMainWindow, text="Submit Score", command=submitScore).grid()
+
+    GameMainWindow.mainloop()
+
+
+# Starts next game level
+def startLevel():
+    return
+
+
+def quitGame():
+    return
+
+
 # Function to start and stop daemon thread readout
 def StartTemp():
     global readTemp
     readTemp = True
+
 
 def stopTemp():
     global readTemp
@@ -203,96 +288,6 @@ class HoverButton(Button):
         self['background'] = self.defaultBackground
 
 
-'''Game and Functions'''
-#Function to open game window
-def startGame ():
-    GameMainWindow = Tk()
-    GameMainWindow.geometry("800x400")
-    GameMainWindow.title("Game")
-    for i in range(10):
-        GameMainWindow.columnconfigure(i, weight=1)
-        GameMainWindow.rowconfigure(i, weight=1)
-    
-    #Game instructions
-    InstructionLabel = Label(GameMainWindow, text="INSTRUCTIONS", padx=5, pady=5, width=20, height=3)
-    InstructionLabel.grid(row=1, column=1)
-    
-    Instruction1 = Label(GameMainWindow, text="You will be given a task you must accomplish in a specified time")
-    Instruction1.grid(row=2, column=1)
-    
-    Instruction2 = Label(GameMainWindow, text="If you complete the task your score will be increased and the next\n task will become harder")
-    Instruction2.grid(row=3, column=1)
-
-    Instruction3 = Label(GameMainWindow, text="If you don't complete the task your game will end and your score\n will be added to the leaderboard if it is high enough")
-    Instruction3.grid(row=4, column=1)
-
-    Instruction4 = Label(GameMainWindow, text="Possible tasks are: getting the temperature above or below a certain value\n or getting the light level above or below a certain value")
-    Instruction4.grid(row=5, column=1)
-
-    Instruction5 = Label(GameMainWindow, text="Press start to begin")
-    Instruction5.grid(row=6, column=1)
-
-    
-    #Start and quit button
-    gameStartButton = Button(GameMainWindow, text="Start", command=startLevel, width=20, height=3)
-    gameStartButton.grid(row=1, column=2, padx=5, pady=5)
-
-    quitGameButton = Button(GameMainWindow, text="Quit", command=quitGame, width=20, height=3)
-    quitGameButton.grid(row=2, column=2, padx=5, pady=5)
-
-    
-    #Highscores
-    HighscoreLabel = Label(GameMainWindow, text="HIGH SCORES", padx=5, pady=5, width=20, height=3)
-    HighscoreLabel.grid(row=1, column=3)
-
-    highscores = [5, 5, 5, 5, 5]
-    Label(GameMainWindow, text="Name", padx=5, pady=5).grid(row=2, column=3, sticky="W")
-    Label(GameMainWindow, text="Score", padx=5, pady=5).grid(row=2, column=3, sticky="E")
-    for highscore in range(len(highscores)):
-        Label(GameMainWindow, text="Name", padx=5, pady=5).grid(row=3+highscore, column=3, sticky="W")
-        Label(GameMainWindow, text="Score", padx=5, pady=5).grid(row=3+highscore, column=3, sticky="E")
-    GameMainWindow.mainloop()
-
-#Starts next game level
-def startLevel():
-    return
-
-def quitGame():
-    return
-
-def GameStateOn():
-
-    def submitScore():
-        with open('HighScore.csv', 'a') as file:
-            file.write("\n" + str(entry.get()) + "," + str(score))
-
-    def countdown(t):
-        countdownLabel['text'] = t
-        if t > 0:
-            game.after(100, countdown, round(t-0.1, 1))
-        else:
-            countdownLabel['text'] = "Time's Up!"
-
-    score = 0
-    countdownTime = 10
-    game = Tk()
-    game.geometry("600x480")
-    game.title("Temperature and Light Game")
-    countdownLabel = Label(game, text=countdownTime)
-    countdownLabel.pack()
-    Button(game, text="Countdown Start!", command=lambda: countdown(countdownTime)).pack()
-    entry = Entry(game)
-    entry.pack()
-    Button(game, text="Submit Score", command=submitScore).pack()
-    game.mainloop()
-
-
-
-
-
-
-
-
 '''Program Starts Here'''
 StartWindow = Tk()
 StartWindow.geometry("600x480")
@@ -370,7 +365,7 @@ currTemp = Label(window, text="Temperature: ")
 currTemp.grid(row=4, column=1, padx=3, pady=3)
 
 # Current temerature
-tempLabel = Label(window, text=" ")
+tempLabel = Label(window, text=" *")
 tempLabel.grid(row=7, column=1, sticky="E", padx=60, pady=3)
 
 # Thermometer
@@ -385,6 +380,7 @@ therm = ttk.Progressbar(window, style="red.Horizontal.TProgressbar", orient="ver
 therm.grid(row=6, rowspan=5, column=1, padx=1, pady=1)
 therm["maximum"] = 50
 
+Label(window, text="0*C/32*F").grid(row=9, column=1, columnspan=2, padx=1, pady=1)  # Low temp label
 
 startTempButton = HoverButton(window, text="Start Reading", command=StartTemp, width=20)
 startTempButton.grid(row=4, column=5, padx=5, sticky="W", pady=5)
