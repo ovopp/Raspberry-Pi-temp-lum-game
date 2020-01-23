@@ -29,32 +29,35 @@ def plotOnOff():
 def plotTemperature():
     global plotVar
     while True:
-        while plotVar:
-            tmpRev = list(reversed(temperatureQueue))
-            lumRev = list(reversed(lumQueue))
-            color = 'tab:red'
-            color2 = 'tab:blue'
-            fig = plt.figure()
-            ax = fig.add_subplot(111)
-            plt.title("Temperature and Luminescence Plot")
-            Ln, = ax.plot(tmpRev)
-            ax.set_xlim([0, 10])
-            ax.set_ylim([0, 100])
-            ax.set_xlabel('Readings')
-            ax.set_ylabel('Temperature (*C)', color=color2)
-            ax2 = ax.twinx()
-            ax2.set_ylabel('Luminescence', color=color)
-            ax2.set_ylim([0, 255])
-            Ln2, = ax2.plot(lumRev, color=color)
-            plt.ion()
+        try:
             while plotVar:
-                plt.show()
-                Ln.set_ydata(list(reversed(temperatureQueue)))
-                Ln2.set_ydata(list(reversed(lumQueue)))
-                Ln.set_xdata(range(len(temperatureQueue)))
-                Ln2.set_xdata(range(len(temperatureQueue)))
-                plt.pause(0.1)
-            plt.close()
+                tmpRev = list(reversed(temperatureQueue))
+                lumRev = list(reversed(lumQueue))
+                color = 'tab:red'
+                color2 = 'tab:blue'
+                fig = plt.figure()
+                ax = fig.add_subplot(111)
+                plt.title("Temperature and Luminescence Plot")
+                Ln, = ax.plot(tmpRev)
+                ax.set_xlim([0, 10])
+                ax.set_ylim([0, 100])
+                ax.set_xlabel('Readings')
+                ax.set_ylabel('Temperature (*C)', color=color2)
+                ax2 = ax.twinx()
+                ax2.set_ylabel('Luminescence', color=color)
+                ax2.set_ylim([0, 255])
+                Ln2, = ax2.plot(lumRev, color=color)
+                plt.ion()
+                while plotVar:
+                    plt.show()
+                    Ln.set_ydata(list(reversed(temperatureQueue)))
+                    Ln2.set_ydata(list(reversed(lumQueue)))
+                    Ln.set_xdata(range(len(temperatureQueue)))
+                    Ln2.set_xdata(range(len(temperatureQueue)))
+                    plt.pause(0.1)
+                plt.close()
+        except TclError:
+            plotVar = False
 
 
 # Change the values to values of the photocell and lm 35 data
@@ -82,14 +85,19 @@ def getTemp():
             else:
                 tempLabel["text"] = str(round(temperatureQueue[0] * 1.8 + 32)) + " *F"
                 lumLabel["text"] = str(lumQueue[0])
-                avgTempLabel["text"] = str(round(sum(temperatureQueue.__iter__()) / 10)) + " *F"
-                avgLumLabel["text"] = str(round(sum(lumQueue.__iter__()) / 10))
+                avgTempLabel["text"] = str(round(sum(temperatureQueue.__iter__()) / len(lumQueue)) + " *F"
+                avgLumLabel["text"] = str(round(sum(lumQueue.__iter__()) / len(lumQueue))
             time.sleep(float(readTime))
 
 
 # Sets the temperature value on the thermometer
 def setTemp(temp):
     therm["value"] = temp
+                                       
+                                          
+# Sets the light level on the light meter
+def setLight(lightLevel):
+    lightMeter["value"] = lightLevel
 
 
 # Initialization function for daemon thread to read values
@@ -118,8 +126,16 @@ def celToFah():
     global celcius
     if celcius:
         celcius = False
+        highTempLabel["text"] = "112 *F"
+        lowTempLabel["text"] = "32 *F"
+        tempLabel["text"] = str(round(temperatureQueue[0] * 1.8 + 32)) + " *F"
+        avgTempLabel["text"] = str(round(1.8 * sum(temperatureQueue.__iter__()) / len(temperatureQueue) + 32)) + " *F"
     else:
         celcius = True
+        highTempLabel["text"] = "50 *C"
+        lowTempLabel["text"] = "0 *C"
+        tempLabel["text"] = str(temperatureQueue[0]) + " *C"
+        avgTempLabel["text"] = str(round(sum(temperatureQueue.__iter__()) / len(temperatureQueue))) + " *C"
 
 
 # Updates readTime variable with Entry information. Throws and handles incorrect inputs
