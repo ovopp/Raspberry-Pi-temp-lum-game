@@ -101,6 +101,13 @@ def __init__():
     thread.daemon = True
     thread.start()
 
+#Function to open game window
+def startGame ():
+    GameWindow = Tk()
+    GameWindow.geometry("800x400")
+    GameWindow.title("Game")
+    
+    GameWindow.mainloop()
 
 # Function to start and stop daemon thread readout
 def StartTemp():
@@ -277,12 +284,14 @@ startTempButton = Button(window, text="Start Reading", command=StartTemp, width=
 stopTempButton = Button(window, text="Stop Reading", command=stopTemp, width=20)
 plotTempButton = Button(window, text="Temperature Plot", command=plotTemperature, width=20)
 plotLumButton = Button(window, text="Luminescence Plot", command=plotLuminescence, width=20)
+gameButton = Button(window, text="Play Game", command=startGame, width=20)
 exitButton = Button(window, text="Exit", command=exitConfirm, width=20)
 
 startTempButton.grid(row=4, column=5, padx=5, pady=5)
 stopTempButton.grid(row=5, column=5, padx=5, pady=5)
 plotTempButton.grid(row=6, column=5, padx=5, pady=5)  # Opens a new window for plot data
 plotLumButton.grid(row=7, column=5, sticky="W", padx=5, pady=5)
-exitButton.grid(row=8, column=5, sticky="W", padx=5, pady=5, columnspan=3)
+gameButton.grid(row=8, column=5, sticky="W", padx=5, pady=5)
+exitButton.grid(row=9, column=5, sticky="W", padx=5, pady=5, columnspan=3)
 
 window.mainloop()
