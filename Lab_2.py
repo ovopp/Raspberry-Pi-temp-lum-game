@@ -5,6 +5,8 @@ import threading
 import time
 import random
 from tkinter import ttk
+import csv
+import operator
 
 # photocell = MCP3008(0)
 # print(photocell.value)
@@ -203,6 +205,42 @@ class HoverButton(Button):
         self['background'] = self.defaultBackground
 
 
+'''Game and Functions'''
+
+
+def GameStateOn():
+
+    def submitScore():
+        with open('HighScore.csv', 'a') as file:
+            file.write("\n" + str(entry.get()) + "," + str(score))
+
+    def countdown(t):
+        countdownLabel['text'] = t
+        if t > 0:
+            game.after(100, countdown, round(t-0.1, 1))
+        else:
+            countdownLabel['text'] = "Time's Up!"
+
+    score = 0
+    countdownTime = 10
+    game = Tk()
+    game.geometry("600x480")
+    game.title("Temperature and Light Game")
+    countdownLabel = Label(game, text=countdownTime)
+    countdownLabel.pack()
+    Button(game, text="Countdown Start!", command=lambda: countdown(countdownTime)).pack()
+    entry = Entry(game)
+    entry.pack()
+    Button(game, text="Submit Score", command=submitScore).pack()
+    game.mainloop()
+
+
+
+
+
+
+
+
 '''Program Starts Here'''
 StartWindow = Tk()
 StartWindow.geometry("600x480")
@@ -318,8 +356,12 @@ avgTempLabel.grid(row=12, column=1, sticky="W", padx=3, pady=3)
 avgTempLabel = Label(window, text="0 *C")
 avgTempLabel.grid(row=12, column=1, sticky="E", padx=10, pady=3)
 
+# Game Button
+
+gameButton = Button(window, text="Play a Game!", command=GameStateOn, width=20)
 stopTempButton = HoverButton(window, text="Stop Reading", command=stopTemp, width=20)
 exitButton = HoverButton(window, text="Exit", command=exitConfirm, width=20)
+gameButton.grid(row=7, column=5, sticky="W", padx=5, pady=5, columnspan=3)
 exitButton.grid(row=8, column=5, sticky="W", padx=5, pady=5, columnspan=3)
 
 window.mainloop()
