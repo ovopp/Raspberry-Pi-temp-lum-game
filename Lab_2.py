@@ -267,8 +267,10 @@ def success():
     quitGameButton = Button(SuccessWindow, text="Quit", command=quitGame, width=20)
     quitGameButton.grid(row=5, column=2, padx=5, pady=5)
 
-
+# Player loses the game
+# Supports storing the score, retry & quit game option
 def Fail():
+    # Stores the score of the player
     def submitScore():
         with open('HighScore.csv', 'a') as file:
             file.write("\n" + str(entry.get()) + "," + str(score))  
@@ -284,18 +286,28 @@ def Fail():
         startGame()
 
     failwindow = Tk()
+    failwindow.geometry("400x150")
+    failwindow.title("Lose!")
+    
+    for i in range(10):
+        failwindow.columnconfigure(i, weight=1)
+        failwindow.rowconfigure(i, weight=1)
+
+    # enter player name and submit their score
     nameLabel = Label(failwindow, text="Enter your Name: ")
     nameLabel.grid(row=0, column=1, sticky="W")
     entry = Entry(failwindow)
     entry.grid(row=0, column=2, sticky="W")
     submitButton = HoverButton(failwindow, text="Submit Score", command=submitScore)
     submitButton.grid(row=0, column=3, sticky="W")
-    failwindow.title("Lose!")
+    
     Label(failwindow, text="\n").grid(row=1, column=0)
-    retryLabel = Button(failwindow, text="Retry", command=failToIdle)
-    retryLabel.grid(row=2, column=1, sticky="E")
-    quitLabel = Button(failwindow, text="Quit", command=failToMain)
-    quitLabel.grid(row=2, column=2, sticky="W")
+    # restart game 
+    retryLabel = HoverButton(failwindow, text="Retry", command=failToIdle, width=20)
+    retryLabel.grid(row=2, column=1, sticky="W")
+    # quit game
+    quitLabel = HoverButton(failwindow, text="Quit", command=failToMain, width=20)
+    quitLabel.grid(row=2, column=2, sticky="E")
 
 
 # Starts next game level
