@@ -16,6 +16,21 @@ import operator
 
 '''Functions for buttons and initializations'''
 
+def Idle():
+    def idleDown(t):
+        global level
+        IdleLabel['text'] = t
+        if t > 0:
+            Idle.after(1000, idleDown, t-1)
+        else:
+            Idle.destroy()
+            startLevel()
+
+    Idle = Tk()
+    IdleLabel = Label(Idle,  text='3')
+    IdleLabel.pack()
+    idleDown(3)
+
 
 def plotOnOff():
     global plotVar
@@ -170,7 +185,7 @@ def startGame():
     Instruction5.grid(row=6, column=1)
 
     # Start and quit button
-    gameStartButton = Button(GameMainWindow, text="Start", command=startLevel, width=20, height=3)
+    gameStartButton = Button(GameMainWindow, text="Start", command=Idle, width=20, height=3)
     gameStartButton.grid(row=1, column=2, padx=5, pady=5)
 
     quitGameButton = Button(GameMainWindow, text="Quit", command=quitGame, width=20, height=3)
