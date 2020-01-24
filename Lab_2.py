@@ -195,12 +195,17 @@ def startGame():
 # Starts next game level
 def startLevel():
     global countdownTime
+    randLum = random.randint(50, 250)
+    randTemp = random.randint(10, 20)
     def countdown(t):
         countdownLabel['text'] = t
         if t > 0:
+            #if randLum == photocell.value or randTemp == lm35.value:
+            #    break
             gamestart.after(100, countdown, round(t - 0.1, 1))
         else:
             countdownLabel['text'] = "Time's Up!"
+            Button(gamestart, text="Quit", command=gamestart.destroy).grid()
 
     gamestart = Tk()
     tasktype = random.randint(0,1)
@@ -209,20 +214,23 @@ def startLevel():
     countdownLabel = Label(gamestart, text=countdownTime)
     countdownLabel.grid()
     countdown(countdownTime)
-    if (tasktype == 0):
+    if tasktype == 0:
+        randLum = 1000  #block off luminescence branch
         goalTemp = Label(gamestart, text="Your goal temperature: ")
         goalTemp.grid(row=1, column=1)
-        goalTemp1 = Label(gamestart, text=random.randint(level*5, level*10))
+        goalTemp1 = Label(gamestart, text=randTemp)
         goalTemp1.grid(row=1, column=2)
         currTempGame = Label(gamestart, text="Temperature: ")
         currTempGame.grid(row=2, column=1, padx=3, pady=3)
     else:
+        randTemp = 1000  #block off temp branch
         goalLum = Label(gamestart, text="Your goal luminescence: ")
         goalLum.grid(row=1, column=1)
-        goalLum1 = Label(gamestart, text=random.randint(level*10, level*30))
+        goalLum1 = Label(gamestart, text=randLum)
         goalLum1.grid(row=1, column=2)
         currLumGame = Label(gamestart, text="Luminescence: ")
         currLumGame.grid(row=2, column=1, padx=3, pady=3)
+    gamestart.mainloop()
 
 
     
