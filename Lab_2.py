@@ -8,9 +8,11 @@ from tkinter import ttk
 import csv
 import operator
 
+#Sets up light sensor
 # photocell = MCP3008(0)
 # print(photocell.value)
 
+#Sets up temperature sensor
 # lm35 = MCP3000(1)
 # print(lm35.value)
 
@@ -26,6 +28,7 @@ def resetGlobals():
 
 #Counts down from 3 and then starts the level
 def Idle():
+    #Moves the number down one (exp. 3->2) and at zero destroys the window and opens the next level
     def idleDown(t):
         global level
         IdleLabel['text'] = t
@@ -60,6 +63,7 @@ def plotTempandLum():
     while True:
         try:
             while plotVar:
+                #Setting up the plot
                 tmpRev = list(reversed(temperatureQueue))
                 lumRev = list(reversed(lumQueue))
                 color = 'tab:red'
@@ -102,11 +106,13 @@ def getTempLum():
         #Records current temparature and updates units based off of user input
         while readTemp:
             if len(temperatureQueue) < 10:
+                #Inserts current values into temperature and luminense queue
                 temperatureQueue.insert(0, random.randint(0, 100))
                 lumQueue.insert(0, random.randint(0, 255))
                 setTemp(temperatureQueue[0])
                 setLight(lumQueue[0])
             else:
+                #Inserts current values into temperature and luminense queue and pops the last value
                 temperatureQueue.pop()  # Pops the last element
                 temperatureQueue.insert(0, random.randint(0,
                                                           100))  # Pushes the first element into Queue, replace with
@@ -115,6 +121,8 @@ def getTempLum():
                 lumQueue.insert(0, random.randint(0, 100))
                 setTemp(temperatureQueue[0])
                 setLight(lumQueue[0])
+                
+            #Changes the units to those specified by the user
             if celcius:
                 tempLabel["text"] = str(temperatureQueue[0]) + " *C"
                 lumLabel["text"] = str(lumQueue[0])
@@ -156,6 +164,7 @@ def startGame():
     #Updates the leaderboard on the main screen
     def UpdateLeaderboard():
         with open('HighScore.csv', 'r') as readHighScore:
+            #Reads from readHighScore csv file
             csv1 = csv.reader(readHighScore, delimiter=",")
             sort = sorted(csv1, key=lambda x: int(x[1]), reverse=True)
             highscorerank = 0
@@ -232,8 +241,8 @@ def startGame():
 
 
 def success():
+    
     # Goes to the next level
-
     def continueGame():
         global level
         level += 1
@@ -288,12 +297,13 @@ def Fail():
         nameentry.destroy()
         Label(failwindow, text="Submitted!").grid(row=0, column=2, sticky='w')
 
-
+    #Jumps from fail to idle if the user retries
     def failToIdle():
         resetGlobals()
         failwindow.destroy()
         Idle()
 
+    #Goes back to the main game screen if the user decides to quit
     def failToMain():
         failwindow.destroy()
         startGame()
@@ -326,35 +336,43 @@ def Fail():
 
 # Starts next game level
 def startLevel():
+    #Runs the countdown on the level and checks wether the user has completed the task
     def countdown(t):
         countdownLabel['text'] = t
         if tasktype:
             currentLum = random.randint(50, 250)
             currLumGame1['text'] = str(currentLum)
+            
+            #If the user achieves the target the success window is opened
             if t > 0:
                 if currentLum == randLum:
                     gamestart.destroy()
                     success()
                 else:
                     gamestart.after(100, countdown, round(t - 0.1, 1))
+                    
+            #If the user runs out of time the fail window is opened
             else:
                 gamestart.destroy()
                 Fail()
         else:
             currentTemp = random.randint(10, 20)
             currTempGame1['text'] = str(currentTemp)
+            #If the user achieves the target the success window is opened
             if t > 0:
                 if currentTemp == randTemp:
                     gamestart.destroy()
                     success()
                 else:
                     gamestart.after(100, countdown, round(t - 0.1, 1))
+            #If the user runs out of time the fail window is opened
             else:
                 gamestart.destroy()
                 Fail()
 
     global countdownTime
     global level
+    #Generates random target value
     randLum = random.randint(50, 250)
     randTemp = random.randint(10, 20)
 
@@ -417,13 +435,14 @@ def stopTemp():
 #Coverts the units on the screen from celcius to ferehnheit and vice versa
 def celToFah():
     global celcius
-    # if ce
+    # if *C then it is converted to *F
     if celcius:
         celcius = False
         highTempLabel["text"] = "112 *F"
         lowTempLabel["text"] = "32 *F"
         tempLabel["text"] = str(round(temperatureQueue[0] * 1.8 + 32)) + " *F"
         avgTempLabel["text"] = str(round(1.8 * sum(temperatureQueue.__iter__()) / 10 + 32)) + " *F"
+    #If *F then it is converted to *C
     else:
         celcius = True
         highTempLabel["text"] = "50 *C"
