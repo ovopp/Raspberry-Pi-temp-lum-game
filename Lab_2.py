@@ -24,7 +24,7 @@ def resetGlobals():
     score = 0
     level = 1
 
-
+#Counts down from 3 and then starts the level
 def Idle():
     def idleDown(t):
         global level
@@ -44,7 +44,7 @@ def Idle():
     IdleLabel.pack()
     idleDown(3)
 
-
+#Turns on or off thd plot (opens/closes)
 def plotOnOff():
     global plotVar
     if plotVar:
@@ -56,6 +56,7 @@ def plotOnOff():
 # Function for plot button
 def plotTempandLum():
     global plotVar
+    
     while True:
         try:
             while plotVar:
@@ -76,6 +77,8 @@ def plotTempandLum():
                 ax2.set_ylim([0, 255])
                 Ln2, = ax2.plot(lumRev, color=color)
                 plt.ion()
+                
+                #Loops through to find the most recent 10 values
                 while plotVar:
                     plt.show()
                     Ln.set_ydata(list(reversed(temperatureQueue)))
@@ -84,6 +87,8 @@ def plotTempandLum():
                     Ln2.set_xdata(range(len(temperatureQueue)))
                     plt.pause(0.1)
                 plt.close()
+                
+        #If there is an error the plot window is closed
         except TclError:
             plotVar = False
 
@@ -94,6 +99,7 @@ def getTempLum():
     global temperatureQueue
     global lumQueue
     while True:
+        #Records current temparature and updates units based off of user input
         while readTemp:
             if len(temperatureQueue) < 10:
                 temperatureQueue.insert(0, random.randint(0, 100))
@@ -147,6 +153,7 @@ def __init__():
 def startGame():
     global score
 
+    #Updates the leaderboard on the main screen
     def UpdateLeaderboard():
         with open('HighScore.csv', 'r') as readHighScore:
             csv1 = csv.reader(readHighScore, delimiter=",")
@@ -165,11 +172,13 @@ def startGame():
     def quitGame():
         GameMainWindow.destroy()
 
+    #Goes from the main game screen to the 321 screen
     def mainToIdle():
         resetGlobals()
         GameMainWindow.destroy()
         Idle()
 
+    #The elements of the main game window
     GameMainWindow = Tk()
     GameMainWindow.geometry("800x400")
     GameMainWindow.title("Game")
@@ -273,7 +282,7 @@ def Fail():
     # Stores the score of the player
     def submitScore():
         with open('HighScore.csv', 'a') as file:
-            file.write("\n" + str(entry.get()) + "," + str(score))  
+            file.write("\n" + str(nameentry.get()) + "," + str(score))  
         file.close()
         submitButton.destroy()
         nameentry.destroy()
@@ -400,12 +409,12 @@ def StartTemp():
     global readTemp
     readTemp = True
 
-
+#Stops reading temparature
 def stopTemp():
     global readTemp
     readTemp = False
 
-
+#Coverts the units on the screen from celcius to ferehnheit and vice versa
 def celToFah():
     global celcius
     # if ce
@@ -442,7 +451,7 @@ def getTime():
         Label(window2, text="The current read time is: " + str(readTime) + " Seconds").grid(row=2, column=3)
         Button(window2, text="Close Window", command=lambda: window2.destroy()).grid(row=3, column=3)
 
-
+#Asks wether the use wants to exit and gives a yes or no button option
 def exitConfirm():
     windowExit = Tk()
     windowExit.title("Exit Program")
@@ -484,7 +493,7 @@ class HoverButton(Button):
 
 
 '''Start of the main program'''
-
+#Creates new window
 window = Tk()
 window.geometry("800x550")
 __init__()  # Initializes two daemon threads to read values off sensors (runs in the background, collects data)
