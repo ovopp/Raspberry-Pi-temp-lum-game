@@ -1,10 +1,12 @@
 from tkinter import *
-import matplotlib
 import matplotlib.pyplot as plt
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-from matplotlib.figure import Figure
+from gpiozero import MCP3008
 import threading
 import time
+import random
+from tkinter import ttk
+import csv
+import operator
 
 '''spidev module and code to read'''
 import spidev
@@ -15,75 +17,414 @@ spi.max_speed_hz = 5000
 '''Functions for buttons and initializations'''
 
 
+# Sets the default global values for the game
+def resetGlobals():
+    global score
+    global level
+    score = 0
+    level = 1
+
+#Counts down from 3 and then starts the level
+def Idle():
+    #Moves the number down one (exp. 3->2) and at zero destroys the window and opens the next level
+    def idleDown(t):
+        global level
+        IdleLabel['text'] = t
+        if t > 0:
+            Idle.after(1000, idleDown, t - 1)
+        else:
+            Idle.destroy()
+            startLevel()
+
+    Idle = Tk()
+    Idle.geometry('100x100')
+    for y in range(10):
+        Idle.columnconfigure(y, weight=1)
+        Idle.rowconfigure(y, weight=1)
+    IdleLabel = Label(Idle, text='3', font=400)
+    IdleLabel.pack()
+    idleDown(3)
+
+#Turns on or off thd plot (opens/closes)
+def plotOnOff():
+    global plotVar
+    if plotVar:
+        plotVar = False
+    else:
+        plotVar = True
+
+
 # Function for plot button
-def plotTemperature():
-    plt.close()
-    sum = 0
-    for i in temperatureQueue:
-        sum += i
-    avgTemp = sum / 10
-    avgQueue = [avgTemp] * 10
-    plt.plot([0, 1, 2, 3, 4, 5, 6, 7, 8, 9], temperatureQueue)
-    plt.ylabel("Temperature (Celcius)")
-    plt.xlabel("Last 10 readings")
-    plt.title("Temperature Plot")
-    plt.plot([0, 1, 2, 3, 4, 5, 6, 7, 8, 9], avgQueue, label='Average Temperature')
-    plt.legend(loc="upper left")
-    plt.show()
-
-
-def plotLuminescence():
-    plt.close()
-    sum = 0
-    for i in lumQueue:
-        sum += i
-    avgLum = sum / 10
-    avgQueue = [avgLum] * 10
-    plt.plot([0, 1, 2, 3, 4, 5, 6, 7, 8, 9], temperatureQueue)
-    plt.ylabel("Luminescence (Lum)")
-    plt.xlabel("Last 10 readings")
-    plt.title("Luminescence Plot")
-    plt.plot([0, 1, 2, 3, 4, 5, 6, 7, 8, 9], avgQueue, label='Average Luminescence')
-    plt.legend(loc="upper left")
-    plt.show()
+def plotTempandLum():
+    global plotVar
+    
+    while True:
+        try:
+            while plotVar:
+                #Setting up the plot
+                tmpRev = list(reversed(temperatureQueue))
+                lumRev = list(reversed(lumQueue))
+                color = 'tab:red'
+                color2 = 'tab:blue'
+                fig = plt.figure()
+                ax = fig.add_subplot(111)
+                plt.title("Temperature and Luminescence Plot")
+                Ln, = ax.plot(tmpRev)
+                ax.set_xlim([0, 10])
+                ax.set_ylim([0, 50])
+                ax.set_xlabel('Readings')
+                ax.set_ylabel('Temperature (*C)', color=color2)
+                ax2 = ax.twinx()
+                ax2.set_ylabel('Luminescence', color=color)
+                ax2.set_ylim([0, 255])
+                Ln2, = ax2.plot(lumRev, color=color)
+                plt.ion()
+                
+                #Loops through to find the most recent 10 values
+                while plotVar:
+                    plt.show()
+                    Ln.set_ydata(list(reversed(temperatureQueue)))
+                    Ln2.set_ydata(list(reversed(lumQueue)))
+                    Ln.set_xdata(range(len(temperatureQueue)))
+                    Ln2.set_xdata(range(len(temperatureQueue)))
+                    plt.pause(0.1)
+                plt.close()
+                
+        #If there is an error the plot window is closed
+        except TclError:
+            plotVar = False
 
 
 # Change the values to values of the photocell and lm 35 data
 # Function for daemon Thread to read temperature (will be modified to save photocell / lm 35 data
-def getTemp():
+def getTempLum():
     global temperatureQueue
     global lumQueue
-    while True:
+    while True:        
+        #Records current temparature and updates units based off of user input
         while readTemp:
             adc = spi.xfer2([1, (8)<<4,0]) # read from channel 0
             data = ((adc[1]& 3) << 8) + adc[2] # form the 10 bit read value
-            adc2 = spi.xfer2([1, (9)<<4,0]) # read from channel 0
+            adc2 = spi.xfer2([1, (9)<<4,0]) # read from channel 1
             data2 = ((adc2[1]& 3) << 8) + adc2[2]
-            temperatureQueue.pop()  # Pops the last element
-            temperatureQueue.insert(0, round(data2*3.3/1024*100))  # Pushes the first element into Queue, replace with lm35.value
-            lumQueue.pop()
-            lumQueue.insert(0, round(data/1024*255))
-            if celcius:
-                tempLabel["text"] = str(temperatureQueue[0]) + " ℃"
-                lumLabel["text"] = str(lumQueue[0])
-                avgTempLabel["text"] = str(round(sum(temperatureQueue.__iter__())/10)) + " ℃"
-                avgLumLabel["text"] = str(round(sum(lumQueue.__iter__())/10))
+            if len(temperatureQueue) < 10:
+                #Inserts current values into temperature and luminense queue
+                temperatureQueue.insert(0, round(data2*3.3/1024*100))
+                lumQueue.insert(0, round(data*255/1024))
+                setTemp(temperatureQueue[0])
+                setLight(lumQueue[0])
             else:
-                tempLabel["text"] = str(round(temperatureQueue[0] * 1.8 + 32)) + " ℉"
+                #Inserts current values into temperature and luminense queue and pops the last value
+                temperatureQueue.pop()  # Pops the last element
+                temperatureQueue.insert(0, round(data2*3.3/1024*100))  # Pushes the first element into Queue, replace with
+                # lm35.value
+                lumQueue.pop()
+                lumQueue.insert(0, round(data*255/1024))
+                setTemp(temperatureQueue[0])
+                setLight(lumQueue[0])
+                
+            #Changes the units to those specified by the user
+            if celcius:
+                tempLabel["text"] = str(temperatureQueue[0]) + " *C"
                 lumLabel["text"] = str(lumQueue[0])
-                avgTempLabel["text"] = str(round(sum(temperatureQueue.__iter__()) / 10)) + " ℉"
-                avgLumLabel["text"] = str(round(sum(lumQueue.__iter__()) / 10))
+                avgTempLabel["text"] = str(round(sum(temperatureQueue.__iter__()) / len([i for i in temperatureQueue if i != 0]))) + " *C"
+                avgLumLabel["text"] = str(round(sum(lumQueue.__iter__()) / len([i for i in lumQueue if i != 0])))
+                time.sleep(float(readTime))
+            else:
+                tempLabel["text"] = str(round(temperatureQueue[0] * 1.8 + 32)) + " *F"
+                lumLabel["text"] = str(lumQueue[0])
+                avgTempLabel["text"] = str(round(sum(temperatureQueue.__iter__()) / len([i for i in temperatureQueue if i != 0]))) + " *F"
+                avgLumLabel["text"] = str(round(sum(lumQueue.__iter__()) / len([i for i in lumQueue if i != 0])))
+                time.sleep(float(readTime))
 
-            print("Temperature Queue: " + str(temperatureQueue))
-            print("Luminescence Queue: " + str(lumQueue))
-            time.sleep(float(readTime))
+
+# Sets the temperature value on the thermometer
+def setTemp(temp):
+    therm["value"] = temp
+
+
+# Sets the light level on the light meter
+def setLight(lightLevel):
+    lightMeter["value"] = lightLevel
 
 
 # Initialization function for daemon thread to read values
 def __init__():
-    thread = threading.Thread(target=getTemp, args=())
+    thread = threading.Thread(target=getTempLum, args=())
     thread.daemon = True
     thread.start()
+    thread2 = threading.Thread(target=plotTempandLum, args=())
+    thread2.daemon = True
+    thread2.start()
+
+
+# Function to open game window
+def startGame():
+    global score
+
+    #Updates the leaderboard on the main screen
+    def UpdateLeaderboard():
+        with open('HighScore.csv', 'r') as readHighScore:
+            #Reads from readHighScore csv file
+            csv1 = csv.reader(readHighScore, delimiter=",")
+            sort = sorted(csv1, key=lambda x: int(x[1]), reverse=True)
+            highscorerank = 0
+            for row in sort:
+                Label(GameMainWindow, text=str(row[0]), padx=5, pady=5).grid(row=3 + highscorerank, column=3,
+                                                                             sticky="W")
+                Label(GameMainWindow, text=str(row[1]), padx=5, pady=5).grid(row=3 + highscorerank, column=3,
+                                                                             sticky="E")
+                highscorerank += 1
+                if highscorerank >= 5:
+                    break
+
+    # Exits game
+    def quitGame():
+        GameMainWindow.destroy()
+
+    #Goes from the main game screen to the 321 screen
+    def mainToIdle():
+        resetGlobals()
+        GameMainWindow.destroy()
+        Idle()
+
+    #The elements of the main game window
+    GameMainWindow = Tk()
+    GameMainWindow.geometry("800x400")
+    GameMainWindow.title("Game")
+    for i in range(10):
+        GameMainWindow.columnconfigure(i, weight=1)
+        GameMainWindow.rowconfigure(i, weight=1)
+
+    # Game instructions
+    InstructionLabel = Label(GameMainWindow, text="INSTRUCTIONS", padx=5, pady=5, width=20, height=3)
+    InstructionLabel.grid(row=1, column=1)
+
+    Instruction1 = Label(GameMainWindow, text="You will be given a task you must accomplish in a specified time",
+                         padx=5, pady=5)
+    Instruction1.grid(row=2, column=1)
+
+    Instruction2 = Label(GameMainWindow,
+                         text="If you complete the task your score will be increased and the next\n task will become harder",
+                         padx=5, pady=5)
+    Instruction2.grid(row=3, column=1)
+
+    Instruction3 = Label(GameMainWindow,
+                         text="If you don't complete the task your game will end and your score\n will be added to the leaderboard if it is high enough",
+                         padx=5, pady=5)
+    Instruction3.grid(row=4, column=1)
+
+    Instruction4 = Label(GameMainWindow,
+                         text="Possible tasks are: getting the temperature above or below a certain\n value or getting the light level above or below a certain value",
+                         padx=5, pady=5)
+    Instruction4.grid(row=5, column=1)
+
+    Instruction5 = Label(GameMainWindow, text="Press start to begin", padx=5, pady=5)
+    Instruction5.grid(row=6, column=1)
+
+    # Start and quit button
+    gameStartButton = Button(GameMainWindow, text="Start", command=mainToIdle, width=20, height=3)
+    gameStartButton.grid(row=1, column=2, padx=5, pady=5)
+
+    quitGameButton = Button(GameMainWindow, text="Quit", command=quitGame, width=20, height=3)
+    quitGameButton.grid(row=2, column=2, padx=5, pady=5)
+
+    # Highscores
+    HighscoreLabel = Label(GameMainWindow, text="HIGH SCORES", padx=5, pady=5, width=20, height=3)
+    HighscoreLabel.grid(row=1, column=3)
+    Label(GameMainWindow, text="Name", padx=5, pady=5).grid(row=2, column=3, sticky="W")
+    Label(GameMainWindow, text="Score", padx=5, pady=5).grid(row=2, column=3, sticky="E")
+    UpdateLeaderboard()
+
+    GameMainWindow.mainloop()
+
+    # If the player successfuly completes the task then the success window opens
+
+
+def success():
+    
+    # Goes to the next level
+    def continueGame():
+        global level
+        level += 1
+        SuccessWindow.destroy()
+        Idle()
+
+    # Exits the success window
+    def quitGame():
+        SuccessWindow.destroy()
+        Fail()
+
+    global score
+    global level
+    # Creates a new window
+    SuccessWindow = Tk()
+    SuccessWindow.geometry("400x200")
+    SuccessWindow.title("SUCCESS")
+
+    # Makes the window scalable
+    for i in range(10):
+        SuccessWindow.columnconfigure(i, weight=1)
+        SuccessWindow.rowconfigure(i, weight=1)
+
+    # Original score
+    Label(SuccessWindow, text="Score:", width=20).grid(row=2, column=1)
+    Label(SuccessWindow, text=str(score)).grid(row=2, column=2, sticky="W")
+
+    # Added score
+    Label(SuccessWindow, text="+").grid(row=3, column=1, sticky="E")
+    Label(SuccessWindow, text=str(level * 10)).grid(row=3, column=2, sticky="W")
+
+    # Final score
+    score += level * 10
+    Label(SuccessWindow, text=str(score)).grid(row=4, column=2, sticky="W")
+
+    # Continue and quit buttons
+    continueButton = Button(SuccessWindow, text="Continue", command=continueGame, width=20)
+    continueButton.grid(row=5, column=1, padx=5, pady=5)
+
+    quitGameButton = Button(SuccessWindow, text="Quit", command=quitGame, width=20)
+    quitGameButton.grid(row=5, column=2, padx=5, pady=5)
+
+# Player loses the game
+# Supports storing the score, retry & quit game option
+def Fail():
+    # Stores the score of the player
+    def submitScore():
+        with open('HighScore.csv', 'a') as file:
+            file.write("\n" + str(nameentry.get()) + "," + str(score))  
+        file.close()
+        submitButton.destroy()
+        nameentry.destroy()
+        Label(failwindow, text="Submitted!").grid(row=0, column=2, sticky='w')
+
+    #Jumps from fail to idle if the user retries
+    def failToIdle():
+        resetGlobals()
+        failwindow.destroy()
+        Idle()
+
+    #Goes back to the main game screen if the user decides to quit
+    def failToMain():
+        failwindow.destroy()
+        startGame()
+
+    failwindow = Tk()
+    failwindow.geometry("600x200")
+    failwindow.title("Lose!")
+    
+    for i in range(10):
+        failwindow.columnconfigure(i, weight=1)
+        failwindow.rowconfigure(i, weight=1)
+
+    # enter player name and submit their score
+    nameLabel = Label(failwindow, text="Enter your Name: ")
+    nameLabel.grid(row=0, column=1, padx=10)
+    nameentry = Entry(failwindow)
+    nameentry.grid(row=0, column=2, sticky="W")
+    submitButton = HoverButton(failwindow, text="Submit Score", command=submitScore)
+    submitButton.grid(row=0, column=3, sticky="W")
+    
+    Label(failwindow, text="\n").grid(row=1, column=0)
+
+    # restart game 
+    retryLabel = HoverButton(failwindow, text="Retry", command=failToIdle, width=20)
+    retryLabel.grid(row=2, column=1, sticky="W")
+    # quit game
+    quitLabel = HoverButton(failwindow, text="Quit", command=failToMain, width=20)
+    quitLabel.grid(row=2, column=2, sticky="E")
+
+
+# Starts next game level
+def startLevel():
+    #Runs the countdown on the level and checks wether the user has completed the task
+    def countdown(t):
+        countdownLabel['text'] = t
+        if tasktype:
+            adc = spi.xfer2([1, (8)<<4,0]) # read from channel 0
+            data = ((adc[1]& 3) << 8) + adc[2] # form the 10 bit read value
+            currentLum = round(data*255/1024)
+            currLumGame1['text'] = str(currentLum)
+            
+            #If the user achieves the target the success window is opened
+            if t > 0:
+                if abs(currentLum-randLum) < 2:
+                    gamestart.destroy()
+                    success()
+                else:
+                    gamestart.after(100, countdown, round(t - 0.1, 1))
+                    
+            #If the user runs out of time the fail window is opened
+            else:
+                gamestart.destroy()
+                Fail()
+        else:
+            adc2 = spi.xfer2([1, (9)<<4,0]) # read from channel 0
+            data2 = ((adc2[1]& 3) << 8) + adc2[2]
+            currentTemp = round((data2*330)/1024)
+            currTempGame1['text'] = str(currentTemp)
+            #If the user achieves the target the success window is opened
+            if t > 0:
+                if currentTemp == randTemp:
+                    gamestart.destroy()
+                    success()
+                else:
+                    gamestart.after(100, countdown, round(t - 0.1, 1))
+            #If the user runs out of time the fail window is opened
+            else:
+                gamestart.destroy()
+                Fail()
+
+    global countdownTime
+    global level
+    #Generates random target value
+    randLum = random.randint(10, 250)
+    randTemp = random.randint(15, 19)
+
+    gamestart = Tk()
+    gamestart.title("In Game")
+    gamestart.geometry('250x100')
+    # Scales the box
+    for x in range(10):
+        gamestart.columnconfigure(x, weight=1)
+        gamestart.rowconfigure(x, weight=1)
+
+    tasktype = random.randint(0, 1)
+
+    # Countdown Module
+    countdownLabel = Label(gamestart, text=countdownTime)
+    countdownLabel.grid(row=1, column=3, sticky='E')
+    countdownLabel1 = Label(gamestart, text="Timer: ")
+    countdownLabel1.grid(row=1, column=1, sticky='W')
+    if tasktype == 0:
+        randLum = 1000  # Blocks false Trues from other task
+        goalTemp = Label(gamestart, text="Your goal temperature: ")
+        goalTemp.grid(row=2, column=1, padx=3, pady=3, sticky='w')
+        goalTemp1 = Label(gamestart, text=randTemp)
+        goalTemp1.grid(row=2, column=3, padx=3, pady=3, sticky='e')
+        currTempGame = Label(gamestart, text="Temperature: ")
+        currTempGame.grid(row=3, column=1, padx=3, pady=3, sticky='w')
+        currTempGame1 = Label(gamestart, text=" ")
+        currTempGame1.grid(row=3, column=3, padx=3, pady=3, sticky='e')
+    else:
+        randTemp = 1000  # Blocks false Trues from other task
+        goalLum = Label(gamestart, text="Your goal luminescence: ")
+        goalLum.grid(row=2, column=1, padx=3, pady=3, sticky='w')
+        goalLum1 = Label(gamestart, text=randLum)
+        goalLum1.grid(row=2, column=3, padx=3, pady=3, sticky='e')
+        currLumGame = Label(gamestart, text="Luminescence: ")
+        currLumGame.grid(row=3, column=1, padx=3, pady=3, sticky='w')
+        currLumGame1 = Label(gamestart, text=" ")
+        currLumGame1.grid(row=3, column=3, padx=3, pady=3, sticky='e')
+    # calculates the countdown time
+    Label(gamestart, text='Score: ').grid(row=4, column=1, padx=3, pady=3, sticky='w')
+    Label(gamestart, text=str(score)).grid(row=4, column=3, padx=3, pady=3, sticky='e')
+    Label(gamestart, text='Level: ').grid(row=5, column=1, padx=3, pady=3, sticky='w')
+    Label(gamestart, text=str(level)).grid(row=5, column=3, padx=3, pady=3, sticky='e')
+    if level < 10:
+        countdown(round(countdownTime - 0.5 * level, 1))
+    else:
+        countdown(5)  # Final levels are all 5 seconds
 
 
 # Function to start and stop daemon thread readout
@@ -91,18 +432,28 @@ def StartTemp():
     global readTemp
     readTemp = True
 
-
+#Stops reading temparature
 def stopTemp():
     global readTemp
     readTemp = False
 
-
+#Coverts the units on the screen from celcius to ferehnheit and vice versa
 def celToFah():
     global celcius
+    # if *C then it is converted to *F
     if celcius:
         celcius = False
+        highTempLabel["text"] = "112 *F"
+        lowTempLabel["text"] = "32 *F"
+        tempLabel["text"] = str(round(temperatureQueue[0] * 1.8 + 32)) + " *F"
+        avgTempLabel["text"] = str(round(1.8 * sum(temperatureQueue.__iter__()) / 10 + 32)) + " *F"
+    #If *F then it is converted to *C
     else:
         celcius = True
+        highTempLabel["text"] = "50 *C"
+        lowTempLabel["text"] = "0 *C"
+        tempLabel["text"] = str(temperatureQueue[0]) + " *C"
+        avgTempLabel["text"] = str(round(sum(temperatureQueue.__iter__()) / 10)) + " *C"
 
 
 # Updates readTime variable with Entry information. Throws and handles incorrect inputs
@@ -124,85 +475,158 @@ def getTime():
         Label(window2, text="The current read time is: " + str(readTime) + " Seconds").grid(row=2, column=3)
         Button(window2, text="Close Window", command=lambda: window2.destroy()).grid(row=3, column=3)
 
+#Asks wether the use wants to exit and gives a yes or no button option
+def exitConfirm():
+    windowExit = Tk()
+    windowExit.title("Exit Program")
+    Label(windowExit, text="Close Program?").grid(row=0, column=1)
+    yes = HoverButton(windowExit, text="Yes", command=exit)
+    yes.grid(row=1, column=1, sticky="E")
+    no = HoverButton(windowExit, text="No", command=windowExit.destroy)
+    no.grid(row=1, column=2, sticky="W")
 
-# Function to destroy and start program for Start Program Button
-def StartProgram():
-    StartWindow.destroy()
-    global start
-    start = True
 
-
-# Initialization Variables
+# Initialization Variables and Global Variables
 readTime = 2
 readTemp = False
 start = False
 celcius = True
-temperatureQueue = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-lumQueue = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+plotVar = False
+temperatureQueue = [0]
+lumQueue = [0]
+countdownTime = 10
+score = 0
+level = 1
 
-'''Program Starts Here'''
-StartWindow = Tk()
-StartWindow.geometry("400x600")
-StartWindow.title("Group 20's Temperature and Light Sensor Program")
-Button(StartWindow, text="Start Program", command=StartProgram, height=20, width=50).pack(padx=5, pady=5)
-Button(StartWindow, text="Quit", command=StartWindow.destroy, height=20, width=50).pack(padx=5, pady=5)
-StartWindow.mainloop()
+# binds buttons to events (enter & leave)
+# code source:
+# https://stackoverflow.com/questions/49888623/tkinter-hovering-over-button-color-change
+class HoverButton(Button):
+    def __init__(self, master, **kw):
+        Button.__init__(self, master=master, **kw)
+        self.defaultBackground = self["background"]
+        self['activebackground'] = 'light gray'
+        self.bind("<Enter>", self.on_enter)
+        self.bind("<Leave>", self.on_leave)
 
-if not start:
-    quit()  # if user presses Quit instead of Start Program
+    def on_enter(self, e):
+        self['background'] = self['activebackground']
+
+    def on_leave(self, e):
+        self['background'] = self.defaultBackground
+
 
 '''Start of the main program'''
-
+#Creates new window
 window = Tk()
-window.geometry("750x400")
-__init__()  # Initializes a daemon thread to read values off sensors (runs in the background, collects data)
-matplotlib.use('TkAgg')
+window.geometry("1000x600")
+__init__()  # Initializes two daemon threads to read values off sensors (runs in the background, collects data)
 window.title("Group 20's Temperature and Light Sensor Program")  # sets title
-message = Message(window, text="Welcome to our program")
-message.grid(row=1, column=1, rowspan=2, columnspan=2, padx=1, pady=1)
-message1 = Message(window, text="To start sensor reading, set a read time (default is 2 seconds) and press Start "
-                                "Reading")
-message1.grid(row=3, column=1, rowspan=3, columnspan=2, padx=3, pady=3)
+for i in range(10):
+    window.columnconfigure(i, weight=1)
+    window.rowconfigure(i, weight=1)
 
-# Get Time Entry window and corresponding button
-Label(window, text="Read Time:").grid(row=1, column=3, padx=5, pady=5)
+welcome = Label(window, text="Welcome to our program!", fg="blue", font=("Calibri", 25))
+welcome.grid(row=0, column=2, columnspan=2, padx=5, pady=20)
+
+start = Label(window, text="To start sensor reading, set a read time \n(default is 2 seconds) and press Start Reading")
+start.grid(row=2, column=1, sticky="W")
+
+blank = Label(window, text="\n\n").grid(row=1, column=1)
+
+timeLabel = Label(window, text="Read Time:")
+timeLabel.grid(row=3, column=1, sticky="W", padx=5, pady=5)
+
 timeEntry = Entry(window)
-timeEntry.grid(row=1, column=4, padx=5, pady=5)
+timeEntry.grid(row=3, column=1, sticky="E", padx=5, pady=5)
 
-Label(window, text="Current Temperature: ").grid(row=6, column=1, padx=3, pady=3)
-Label(window, text="Current Luminescence: ").grid(row=7, column=1, padx=3, pady=3)
-tempLabel = Label(window, text=str(temperatureQueue[0]) + " ℃")
-tempLabel.grid(row=6, column=2, padx=3, pady=3)
-lumLabel = Label(window, text=str(lumQueue[0]))
-lumLabel.grid(row=7, column=2, padx=3, pady=3)
-Button(window, text="C/F", command=celToFah).grid(row=6, column=3, padx=3, pady=3)
+getTimeButton = Button(window, text="Set Time", command=getTime)
+getTimeButton.grid(row=3, column=2, sticky="W", padx=5, pady=5)
 
-Label(window, text="Average Temperature (Over 10 points): ").grid(row=8, column=1, padx=3, pady=3)
-Label(window, text="Average Luminescence (Over 10 points): ").grid(row=9, column=1, padx=3, pady=3)
-avgTempLabel = Label(window, text="0 ℃")
-avgTempLabel.grid(row=8, column=2, padx=3, pady=3)
+'''Liminescence'''
+# Current luminenscence label
+currLum = Label(window, text="Luminescence: ")
+currLum.grid(row=4, column=3, padx=3, pady=3)
+
+# Current luminenscence
+lumLabel = Label(window, text=" ")
+lumLabel.grid(row=7, column=3, sticky="E", padx=60, pady=3)
+
+convertCF = HoverButton(window, text="C/F", command=celToFah)
+convertCF.grid(row=6, column=2, sticky="W", padx=3, pady=3)
+getTimeButton = HoverButton(window, text="Set Time", command=getTime)
+getTimeButton.grid(row=3, column=2, sticky="W", padx=5, pady=5)
+
+# Light meter
+Label(window, text="255").grid(row=5, column=3, padx=5, pady=1)  # High temp label
+s = ttk.Style()
+s.theme_use('clam')
+s.configure("yellow.Horizontal.TProgressbar", foreground='black', background='yellow')
+lightMeter = ttk.Progressbar(window, style="yellow.Horizontal.TProgressbar", orient="vertical", length=200,
+                             mode="determinate", maximum=4, value=1)  # Progress bar
+lightMeter.grid(row=6, rowspan=5, column=3, padx=5, pady=1)
+lightMeter["maximum"] = 255
+Label(window, text="0").grid(row=11, column=3, padx=5, pady=1)  # Low temp label
+
+# Average Luminescence label
+avgLumLabel = Label(window, text="Average Luminescence: ")
+avgLumLabel.grid(row=12, column=3, sticky="W", padx=10, pady=3)
+
+# Average luminenscence
 avgLumLabel = Label(window, text="0")
-avgLumLabel.grid(row=9, column=2, padx=3, pady=3)
+avgLumLabel.grid(row=12, column=3, sticky="E", padx=10, pady=3)
 
-getTimeButton = Button(window, text="Set Time", command=getTime, width=10).grid(row=1, column=5, padx=5, pady=5)
+'''Temperature'''
+# Current temperature label
+currTemp = Label(window, text="Temperature: ")
+currTemp.grid(row=4, column=1, padx=3, pady=3)
 
-startTempButton = Button(window, text="Start Reading", command=StartTemp, width=20).grid(row=3, padx=5, pady=5,
-                                                                                         column=6)
-stopTempButton = Button(window, text="Stop Reading", command=stopTemp, width=20).grid(row=4, column=6, padx=5, pady=5)
+# Current temerature
+tempLabel = Label(window, text=" *")
+tempLabel.grid(row=7, column=1, sticky="E", padx=60, pady=3)
 
-plotTempButton = Button(window, text="Temperature Plot", command=plotTemperature, width=20).grid(row=5, column=6,
-                                                                                                 padx=5,
-                                                                                                 pady=5)  # Opens a new window for plot data
-plotLumButton = Button(window, text="Luminescence Plot", command=plotLuminescence, width=20).grid(row=6, column=6,
-                                                                                                  padx=5, pady=5)
+# Thermometer
+highTempLabel = Label(window, text="50 *C")  # High temp label
+highTempLabel.grid(row=5, column=1, padx=5, pady=1)
 
-exitButton = Button(window, text="Exit", command=exit, width=20).grid(row=7, column=6, padx=5, pady=5, columnspan=3)
+s = ttk.Style()
+s.theme_use('clam')
+s.configure("red.Horizontal.TProgressbar", foreground='red', background='red')
+therm = ttk.Progressbar(window, style="red.Horizontal.TProgressbar", orient="vertical", length=200, mode="determinate",
+                        maximum=4, value=1)  # Progress bar
+therm.grid(row=6, rowspan=5, column=1, padx=1, pady=1)
+therm["maximum"] = 50
 
-# Will be a thermometer at some point or another
-'''canvas = Canvas(window, width=200, height=500)
-canvas.create_rectangle(15, 200, 50, 50)
-canvas.grid(column=4)'''
+Label(window, text="0*C/32*F").grid(row=9, column=1, columnspan=2, padx=1, pady=1)  # Low temp label
 
-window.mainloop()  # Last line of project
+startTempButton = HoverButton(window, text="Start Reading", command=StartTemp, width=20)
+startTempButton.grid(row=4, column=5, padx=5, sticky="W", pady=5)
 
+stopTempButton = HoverButton(window, text="Stop Reading", command=stopTemp, width=20)
+stopTempButton.grid(row=5, column=5, padx=5, sticky="W", pady=5)
+
+# Opens a new window for plot data
+plotButton = HoverButton(window, text="Plots ON / OFF", command=plotOnOff, width=20)
+plotButton.grid(row=6, column=5, padx=5, sticky="W", pady=5)
+
+lowTempLabel = Label(window, text="0 *C")  # Low temp label
+lowTempLabel.grid(row=11, column=1, padx=1, pady=1)
+
+# Average temperature label
+avgTempLabel = Label(window, text="Average Temperature: ")
+avgTempLabel.grid(row=12, column=1, sticky="W", padx=3, pady=3)
+
+# Average Temperature
+avgTempLabel = Label(window, text="0 *C")
+avgTempLabel.grid(row=12, column=1, sticky="E", padx=10, pady=3)
+
+# Game Button
+
+gameButton = Button(window, text="Play a Game!", command=startGame, width=20)
+stopTempButton = HoverButton(window, text="Stop Reading", command=stopTemp, width=20)
+exitButton = HoverButton(window, text="Exit", command=exitConfirm, width=20)
+gameButton.grid(row=7, column=5, sticky="W", padx=5, pady=5, columnspan=3)
+exitButton.grid(row=8, column=5, sticky="W", padx=5, pady=5, columnspan=3)
+
+window.mainloop()
 

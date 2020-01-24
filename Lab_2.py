@@ -1,6 +1,6 @@
 from tkinter import *
 import matplotlib.pyplot as plt
-# from gpiozero import MCP3008
+from gpiozero import MCP3008
 import threading
 import time
 import random
@@ -9,12 +9,10 @@ import csv
 import operator
 
 #Sets up light sensor
-# photocell = MCP3008(0)
-# print(photocell.value)
+photocell = MCP3008(0)
 
 #Sets up temperature sensor
-# lm35 = MCP3000(1)
-# print(lm35.value)
+lm35 = MCP3008(1)
 
 '''Functions for buttons and initializations'''
 
@@ -107,18 +105,17 @@ def getTempLum():
         while readTemp:
             if len(temperatureQueue) < 10:
                 #Inserts current values into temperature and luminense queue
-                temperatureQueue.insert(0, random.randint(0, 100))
-                lumQueue.insert(0, random.randint(0, 255))
+                temperatureQueue.insert(0, round((lm35.value*3.3)*100))
+                lumQueue.insert(0, round(photocell.value*255))
                 setTemp(temperatureQueue[0])
                 setLight(lumQueue[0])
             else:
                 #Inserts current values into temperature and luminense queue and pops the last value
                 temperatureQueue.pop()  # Pops the last element
-                temperatureQueue.insert(0, random.randint(0,
-                                                          100))  # Pushes the first element into Queue, replace with
+                temperatureQueue.insert(0, round((lm35.value*3.3)*100))  # Pushes the first element into Queue, replace with
                 # lm35.value
                 lumQueue.pop()
-                lumQueue.insert(0, random.randint(0, 100))
+                lumQueue.insert(0, round(photocell.value*255))
                 setTemp(temperatureQueue[0])
                 setLight(lumQueue[0])
                 
@@ -126,14 +123,14 @@ def getTempLum():
             if celcius:
                 tempLabel["text"] = str(temperatureQueue[0]) + " *C"
                 lumLabel["text"] = str(lumQueue[0])
-                avgTempLabel["text"] = str(round(sum(temperatureQueue.__iter__()) / len(lumQueue))) + " *C"
-                avgLumLabel["text"] = str(round(sum(lumQueue.__iter__()) / len(lumQueue)))
+                avgTempLabel["text"] = str(round(sum(temperatureQueue.__iter__()) / len([i for i in temperatureQueue if i != 0]))) + " *C"
+                avgLumLabel["text"] = str(round(sum(lumQueue.__iter__()) / len([i for i in lumQueue if i != 0])))
                 time.sleep(float(readTime))
             else:
                 tempLabel["text"] = str(round(temperatureQueue[0] * 1.8 + 32)) + " *F"
                 lumLabel["text"] = str(lumQueue[0])
-                avgTempLabel["text"] = str(round(sum(temperatureQueue.__iter__()) / len(lumQueue))) + " *F"
-                avgLumLabel["text"] = str(round(sum(lumQueue.__iter__()) / len(lumQueue)))
+                avgTempLabel["text"] = str(round(sum(temperatureQueue.__iter__()) / len([i for i in temperatureQueue if i != 0]))) + " *F"
+                avgLumLabel["text"] = str(round(sum(lumQueue.__iter__()) / len([i for i in lumQueue if i != 0])))
                 time.sleep(float(readTime))
 
 
@@ -309,7 +306,7 @@ def Fail():
         startGame()
 
     failwindow = Tk()
-    failwindow.geometry("400x150")
+    failwindow.geometry("600x200")
     failwindow.title("Lose!")
     
     for i in range(10):
@@ -340,12 +337,12 @@ def startLevel():
     def countdown(t):
         countdownLabel['text'] = t
         if tasktype:
-            currentLum = random.randint(50, 250)
+            currentLum = round(photocell.value*255)
             currLumGame1['text'] = str(currentLum)
             
             #If the user achieves the target the success window is opened
             if t > 0:
-                if currentLum == randLum:
+                if abs(currentLum-randLum) < 2:
                     gamestart.destroy()
                     success()
                 else:
@@ -356,7 +353,7 @@ def startLevel():
                 gamestart.destroy()
                 Fail()
         else:
-            currentTemp = random.randint(10, 20)
+            currentTemp = round((lm35.value*3.3)*100)
             currTempGame1['text'] = str(currentTemp)
             #If the user achieves the target the success window is opened
             if t > 0:
@@ -373,8 +370,8 @@ def startLevel():
     global countdownTime
     global level
     #Generates random target value
-    randLum = random.randint(50, 250)
-    randTemp = random.randint(10, 20)
+    randLum = random.randint(10, 250)
+    randTemp = random.randint(15, 19)
 
     gamestart = Tk()
     gamestart.title("In Game")
@@ -514,7 +511,7 @@ class HoverButton(Button):
 '''Start of the main program'''
 #Creates new window
 window = Tk()
-window.geometry("800x550")
+window.geometry("1000x600")
 __init__()  # Initializes two daemon threads to read values off sensors (runs in the background, collects data)
 window.title("Group 20's Temperature and Light Sensor Program")  # sets title
 for i in range(10):
