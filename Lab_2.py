@@ -274,7 +274,7 @@ def Fail():
             file.write("\n" + str(entry.get()) + "," + str(score))  
         file.close()
         submitButton.destroy()
-        Label(failwindow, text="Score Submitted!, press Quit to Return to Game Window").grid(row=1, column=0)
+        Label(failwindow, text="Submitted!").grid(row=0, column=2, sticky='w')
 
 
     def failToIdle():
@@ -287,18 +287,18 @@ def Fail():
         startGame()
 
     failwindow = Tk()
+    failwindow.geometry('350x70')
     nameLabel = Label(failwindow, text="Enter your Name: ")
-    nameLabel.grid(row=0, column=1, sticky="W")
+    nameLabel.grid(row=0, column=0, sticky="W")
     entry = Entry(failwindow)
-    entry.grid(row=0, column=0)
+    entry.grid(row=0, column=1)
     submitButton = Button(failwindow, text="Submit Score", command=submitScore)
-    submitButton.grid(row=1, column=0)
+    submitButton.grid(row=0, column=2, sticky='w')
     failwindow.title("Lose!")
-    Label(failwindow, text="\n").grid(row=1, column=0)
     retryLabel = Button(failwindow, text="Retry", command=failToIdle)
-    retryLabel.grid(row=2, column=1, sticky="E")
+    retryLabel.grid(row=1, column=1, sticky="e")
     quitLabel = Button(failwindow, text="Quit", command=failToMain)
-    quitLabel.grid(row=2, column=2, sticky="W")
+    quitLabel.grid(row=1, column=2, sticky="w")
 
 
 # Starts next game level
