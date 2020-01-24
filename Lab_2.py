@@ -151,6 +151,37 @@ def startGame():
                 if highscorerank >= 5:
                     break
 
+    def continueGame():
+        return
+    def quitGame():
+        return
+    def success():
+        SuccessWindow = Tk()
+        SuccessWindow.geometry("400x200")
+        SuccessWindow.title("SUCCESS")
+        for i in range(10):
+            SuccessWindow.columnconfigure(i, weight=1)
+            SuccessWindow.rowconfigure(i, weight=1)
+            
+        #Original score
+        Label(SuccessWindow, text="Score:", width=20).grid(row = 2, column = 1)
+        Label(SuccessWindow, text=str(score)).grid(row = 2, column = 2, sticky="W")
+
+        #Added score
+        Label(SuccessWindow, text="+").grid(row = 3, column = 1, sticky="E")
+        Label(SuccessWindow, text=str(level*10)).grid(row = 3, column = 2, sticky="W")
+
+        #Final score
+        score += level*10
+        Label(SuccessWindow, text=str(score)).grid(row = 4, column = 2, sticky="W")
+
+        #Continue and quit buttons
+        continueButton = Button(SuccessWindow, text="Continue", command=continueGame, width=20)
+        continueButton.grid(row=5, column=1, padx=5, pady=5)
+
+        quitGameButton = Button(SuccessWindow, text="Quit", command=quitGame, width=20)
+        quitGameButton.grid(row=5, column=2, padx=5, pady=5)
+    
     GameMainWindow = Tk()
     GameMainWindow.geometry("800x400")
     GameMainWindow.title("Game")
