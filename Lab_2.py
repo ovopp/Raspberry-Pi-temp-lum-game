@@ -16,6 +16,21 @@ import operator
 
 '''Functions for buttons and initializations'''
 
+def Idle():
+    def idleDown(t):
+        global level
+        IdleLabel['text'] = t
+        if t > 0:
+            Idle.after(1000, idleDown, t-1)
+        else:
+            Idle.destroy()
+            startLevel()
+
+    Idle = Tk()
+    IdleLabel = Label(Idle,  text='3')
+    IdleLabel.pack()
+    idleDown(3)
+
 
 def plotOnOff():
     global plotVar
@@ -131,6 +146,40 @@ def startGame():
                 if highscorerank >= 5:
                     break
 
+    def continueGame():
+        return
+    def quitGame():
+        return
+    def success():
+        SuccessWindow = Tk()
+        SuccessWindow.geometry("400x200")
+        SuccessWindow.title("SUCCESS")
+        for i in range(10):
+            SuccessWindow.columnconfigure(i, weight=1)
+            SuccessWindow.rowconfigure(i, weight=1)
+            
+        #Original score
+        Label(SuccessWindow, text="Score:", width=20).grid(row = 2, column = 1)
+        Label(SuccessWindow, text=str(score)).grid(row = 2, column = 2, sticky="W")
+
+        #Added score
+        Label(SuccessWindow, text="+").grid(row = 3, column = 1, sticky="E")
+        Label(SuccessWindow, text=str(level*10)).grid(row = 3, column = 2, sticky="W")
+
+        #Final score
+        score += level*10
+        Label(SuccessWindow, text=str(score)).grid(row = 4, column = 2, sticky="W")
+
+        #Continue and quit buttons
+        continueButton = Button(SuccessWindow, text="Continue", command=continueGame, width=20)
+        continueButton.grid(row=5, column=1, padx=5, pady=5)
+
+        quitGameButton = Button(SuccessWindow, text="Quit", command=quitGame, width=20)
+        quitGameButton.grid(row=5, column=2, padx=5, pady=5)
+        
+    def quitGame():
+        GameMainWindow.destroy()
+        
     GameMainWindow = Tk()
     GameMainWindow.geometry("800x400")
     GameMainWindow.title("Game")
@@ -165,7 +214,7 @@ def startGame():
     Instruction5.grid(row=6, column=1)
 
     # Start and quit button
-    gameStartButton = Button(GameMainWindow, text="Start", command=startLevel, width=20, height=3)
+    gameStartButton = Button(GameMainWindow, text="Start", command=Idle, width=20, height=3)
     gameStartButton.grid(row=1, column=2, padx=5, pady=5)
 
     quitGameButton = Button(GameMainWindow, text="Quit", command=quitGame, width=20, height=3)
@@ -206,7 +255,11 @@ def Fail():
 # Starts next game level
 def startLevel():
     global countdownTime
+    global level
+    randLum = random.randint(50, 250)
+    randTemp = random.randint(10, 20)
     def countdown(t):
+        global level
         countdownLabel['text'] = t
         if t > 0:
             gamestart.after(5, countdown, round(t - 0.1, 1))
@@ -214,31 +267,32 @@ def startLevel():
             gamestart.destroy()
             Fail()
 
+
     gamestart = Tk()
     gamestart.title("In Game")
     tasktype = random.randint(0,1)
-    level = 1
     # Countdown Module
     countdownLabel = Label(gamestart, text=countdownTime)
     countdownLabel.grid()
-    countdown(countdownTime)
-    if (tasktype == 0):
+    if tasktype == 0:
+        randLum = 1000  #block off luminescence branch
         goalTemp = Label(gamestart, text="Your goal temperature: ")
         goalTemp.grid(row=1, column=1)
-        goalTemp1 = Label(gamestart, text=random.randint(level*5, level*10))
+        goalTemp1 = Label(gamestart, text=randTemp)
         goalTemp1.grid(row=1, column=2)
         currTempGame = Label(gamestart, text="Temperature: ")
         currTempGame.grid(row=2, column=1, padx=3, pady=3)
     else:
+        randTemp = 1000  #block off temp branch
         goalLum = Label(gamestart, text="Your goal luminescence: ")
         goalLum.grid(row=1, column=1)
-        goalLum1 = Label(gamestart, text=random.randint(level*10, level*30))
+        goalLum1 = Label(gamestart, text=randLum)
         goalLum1.grid(row=1, column=2)
         currLumGame = Label(gamestart, text="Luminescence: ")
         currLumGame.grid(row=2, column=1, padx=3, pady=3)
+    countdown(countdownTime - 0.5*level)
+    gamestart.mainloop()
 
-def quitGame():
-    return
 
 
 # Function to start and stop daemon thread readout
@@ -289,12 +343,6 @@ def getTime():
         Button(window2, text="Close Window", command=lambda: window2.destroy()).grid(row=3, column=3)
 
 
-# Function to destroy and start program for Start Program Button
-def StartProgram():
-    StartWindow.destroy()
-    global start
-    start = True
-
 
 def exitConfirm():
     windowExit = Tk()
@@ -316,6 +364,7 @@ temperatureQueue = [0]
 lumQueue = [0]
 countdownTime = 10
 score = 0
+level = 0
 
 
 class HoverButton(Button):
@@ -332,17 +381,6 @@ class HoverButton(Button):
     def on_leave(self, e):
         self['background'] = self.defaultBackground
 
-
-'''Program Starts Here'''
-StartWindow = Tk()
-StartWindow.geometry("600x480")
-StartWindow.title("Group 20's Temperature and Light Sensor Program")
-Button(StartWindow, text="Start Program", command=StartProgram, height=20, width=50).pack(padx=5, pady=5)
-Button(StartWindow, text="Quit", command=StartWindow.destroy, height=20, width=50).pack(padx=5, pady=5)
-StartWindow.mainloop()
-
-if not start:
-    quit()  # if user presses Quit instead of Start Program
 
 '''Start of the main program'''
 
