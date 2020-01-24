@@ -195,25 +195,30 @@ def startGame():
 # Starts next game level
 def startLevel():
     global countdownTime
+    global level
     randLum = random.randint(50, 250)
     randTemp = random.randint(10, 20)
     def countdown(t):
+        global level
         countdownLabel['text'] = t
-        if t > 0:
-            #if randLum == photocell.value or randTemp == lm35.value:
-            #    break
-            gamestart.after(100, countdown, round(t - 0.1, 1))
+        testLum = random.randint(50, 100)
+        testTemp = random.randint(10, 20)
+        if randLum == testLum or randTemp == testTemp:
+            print("Success")
+            level += 1
+            gamestart.destroy()
         else:
-            countdownLabel['text'] = "Time's Up!"
-            Button(gamestart, text="Quit", command=gamestart.destroy).grid()
+            if t > 0:
+                gamestart.after(100, countdown, round(t - 0.1, 1))
+            else:
+                countdownLabel['text'] = "Time's Up!"
+                Button(gamestart, text="Quit", command=gamestart.destroy).grid()
 
     gamestart = Tk()
     tasktype = random.randint(0,1)
-    level = 1
     # Countdown Module
     countdownLabel = Label(gamestart, text=countdownTime)
     countdownLabel.grid()
-    countdown(countdownTime)
     if tasktype == 0:
         randLum = 1000  #block off luminescence branch
         goalTemp = Label(gamestart, text="Your goal temperature: ")
@@ -230,6 +235,7 @@ def startLevel():
         goalLum1.grid(row=1, column=2)
         currLumGame = Label(gamestart, text="Luminescence: ")
         currLumGame.grid(row=2, column=1, padx=3, pady=3)
+    countdown(countdownTime - 0.5*level)
     gamestart.mainloop()
 
 
@@ -288,12 +294,6 @@ def getTime():
         Button(window2, text="Close Window", command=lambda: window2.destroy()).grid(row=3, column=3)
 
 
-# Function to destroy and start program for Start Program Button
-def StartProgram():
-    StartWindow.destroy()
-    global start
-    start = True
-
 
 def exitConfirm():
     windowExit = Tk()
@@ -315,6 +315,7 @@ temperatureQueue = [0]
 lumQueue = [0]
 countdownTime = 10
 score = 0
+level = 0
 
 
 class HoverButton(Button):
@@ -331,17 +332,6 @@ class HoverButton(Button):
     def on_leave(self, e):
         self['background'] = self.defaultBackground
 
-
-'''Program Starts Here'''
-StartWindow = Tk()
-StartWindow.geometry("600x480")
-StartWindow.title("Group 20's Temperature and Light Sensor Program")
-Button(StartWindow, text="Start Program", command=StartProgram, height=20, width=50).pack(padx=5, pady=5)
-Button(StartWindow, text="Quit", command=StartWindow.destroy, height=20, width=50).pack(padx=5, pady=5)
-StartWindow.mainloop()
-
-if not start:
-    quit()  # if user presses Quit instead of Start Program
 
 '''Start of the main program'''
 
