@@ -263,7 +263,6 @@ def Fail():
     quitLabel = Button(failwindow, text="Quit", command=failwindow.destroy)
     quitLabel.grid(row=0, column=2)
 
-
 # Starts next game level
 def startLevel():
     global countdownTime
