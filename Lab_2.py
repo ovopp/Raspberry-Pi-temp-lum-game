@@ -130,6 +130,9 @@ def celToFah():
         avgTempLabel["text"] = str(round(sum(temperatureQueue.__iter__())/10)) + " *C"
 
 
+
+
+
 # Updates readTime variable with Entry information. Throws and handles incorrect inputs
 def getTime():
     global readTime
