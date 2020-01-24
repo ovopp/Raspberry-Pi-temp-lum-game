@@ -145,15 +145,24 @@ def startGame():
                 highscorerank += 1
                 if highscorerank >= 5:
                     break
-
-    def continueGame():
-        return
-    def quitGame():
-        return
+                    
+    #If the player successfuly completes the task then the success window opens
     def success():
+        #Goes to the next level
+        def continueGame():
+            level++
+            SuccessWindow.destroy()
+            Idle()
+        #Exits the success window
+        def quitGame():
+            SuccessWindow.destroy()
+            Fail()
+        #Creates a new window
         SuccessWindow = Tk()
         SuccessWindow.geometry("400x200")
         SuccessWindow.title("SUCCESS")
+        
+        #Makes the window scalable
         for i in range(10):
             SuccessWindow.columnconfigure(i, weight=1)
             SuccessWindow.rowconfigure(i, weight=1)
@@ -173,10 +182,11 @@ def startGame():
         #Continue and quit buttons
         continueButton = Button(SuccessWindow, text="Continue", command=continueGame, width=20)
         continueButton.grid(row=5, column=1, padx=5, pady=5)
-
+        
         quitGameButton = Button(SuccessWindow, text="Quit", command=quitGame, width=20)
         quitGameButton.grid(row=5, column=2, padx=5, pady=5)
         
+    #Exits game
     def quitGame():
         GameMainWindow.destroy()
         
