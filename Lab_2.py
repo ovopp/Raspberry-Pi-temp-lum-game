@@ -117,18 +117,12 @@ def __init__():
 
 # Function to open game window
 def startGame():
+    global score
     def submitScore():
         with open('HighScore.csv', 'a') as file:
             file.write("\n" + str(entry.get()) + "," + str(score))
         file.close()
         UpdateLeaderboard()
-
-    def countdown(t):
-        countdownLabel['text'] = t
-        if t > 0:
-            GameMainWindow.after(100, countdown, round(t - 0.1, 1))
-        else:
-            countdownLabel['text'] = "Time's Up!"
 
     def UpdateLeaderboard():
         with open('HighScore.csv', 'r') as readHighScore:
@@ -148,8 +142,6 @@ def startGame():
     for i in range(10):
         GameMainWindow.columnconfigure(i, weight=1)
         GameMainWindow.rowconfigure(i, weight=1)
-    score = 0
-    countdownTime = 10
 
     # Game instructions
     InstructionLabel = Label(GameMainWindow, text="INSTRUCTIONS", padx=5, pady=5, width=20, height=3)
@@ -192,11 +184,7 @@ def startGame():
     Label(GameMainWindow, text="Name", padx=5, pady=5).grid(row=2, column=3, sticky="W")
     Label(GameMainWindow, text="Score", padx=5, pady=5).grid(row=2, column=3, sticky="E")
     UpdateLeaderboard()
-    
-    # Countdown Module
-    countdownLabel = Label(GameMainWindow, text=countdownTime)
-    countdownLabel.grid()
-    Button(GameMainWindow, text="Countdown Start!", command=lambda: countdown(countdownTime)).grid()
+
     entry = Entry(GameMainWindow)
     entry.grid()
     Button(GameMainWindow, text="Submit Score", command=submitScore).grid()
@@ -206,9 +194,21 @@ def startGame():
 
 # Starts next game level
 def startLevel():
+    global countdownTime
+    def countdown(t):
+        countdownLabel['text'] = t
+        if t > 0:
+            gamestart.after(100, countdown, round(t - 0.1, 1))
+        else:
+            countdownLabel['text'] = "Time's Up!"
+
     gamestart = Tk()
     tasktype = random.randint(0,1)
     level = 1
+    # Countdown Module
+    countdownLabel = Label(gamestart, text=countdownTime)
+    countdownLabel.grid()
+    countdown(countdownTime)
     if (tasktype == 0):
         goalTemp = Label(gamestart, text="Your goal temperature: ")
         goalTemp.grid(row=1, column=1)
@@ -223,6 +223,7 @@ def startLevel():
         goalLum1.grid(row=1, column=2)
         currLumGame = Label(gamestart, text="Luminescence: ")
         currLumGame.grid(row=2, column=1, padx=3, pady=3)
+
 
     
 
@@ -304,6 +305,8 @@ celcius = True
 plotVar = False
 temperatureQueue = [0]
 lumQueue = [0]
+countdownTime = 10
+score = 0
 
 
 class HoverButton(Button):
