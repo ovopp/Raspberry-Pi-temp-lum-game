@@ -273,6 +273,9 @@ def Fail():
         with open('HighScore.csv', 'a') as file:
             file.write("\n" + str(entry.get()) + "," + str(score))  
         file.close()
+        submitButton.destroy()
+        Label(failwindow, text="Score Submitted!, press Quit to Return to Game Window").grid(row=1, column=0)
+
 
     def failToIdle():
         resetGlobals()
@@ -287,9 +290,9 @@ def Fail():
     nameLabel = Label(failwindow, text="Enter your Name: ")
     nameLabel.grid(row=0, column=1, sticky="W")
     entry = Entry(failwindow)
-    entry.grid(row=0, column=2, sticky="W")
-    submitButton = HoverButton(failwindow, text="Submit Score", command=submitScore)
-    submitButton.grid(row=0, column=3, sticky="W")
+    entry.grid(row=0, column=0)
+    submitButton = Button(failwindow, text="Submit Score", command=submitScore)
+    submitButton.grid(row=1, column=0)
     failwindow.title("Lose!")
     Label(failwindow, text="\n").grid(row=1, column=0)
     retryLabel = Button(failwindow, text="Retry", command=failToIdle)
