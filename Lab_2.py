@@ -31,6 +31,11 @@ def Idle():
     IdleLabel.pack()
     idleDown(3)
 
+def resetGlobals():
+    global score
+    global level
+    score = 0
+    level = 0
 
 def plotOnOff():
     global plotVar
