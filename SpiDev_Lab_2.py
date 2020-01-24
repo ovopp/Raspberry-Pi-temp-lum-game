@@ -190,7 +190,7 @@ def startGame():
 
     #The elements of the main game window
     GameMainWindow = Tk()
-    GameMainWindow.geometry("800x400")
+    GameMainWindow.geometry("1000x500")
     GameMainWindow.title("Game")
     for i in range(10):
         GameMainWindow.columnconfigure(i, weight=1)

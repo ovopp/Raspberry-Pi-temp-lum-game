@@ -71,7 +71,7 @@ def plotTempandLum():
                 plt.title("Temperature and Luminescence Plot")
                 Ln, = ax.plot(tmpRev)
                 ax.set_xlim([0, 10])
-                ax.set_ylim([0, 100])
+                ax.set_ylim([0, 50])
                 ax.set_xlabel('Readings')
                 ax.set_ylabel('Temperature (*C)', color=color2)
                 ax2 = ax.twinx()
@@ -186,7 +186,7 @@ def startGame():
 
     #The elements of the main game window
     GameMainWindow = Tk()
-    GameMainWindow.geometry("800x400")
+    GameMainWindow.geometry("1000x500")
     GameMainWindow.title("Game")
     for i in range(10):
         GameMainWindow.columnconfigure(i, weight=1)
@@ -288,7 +288,7 @@ def Fail():
     # Stores the score of the player
     def submitScore():
         with open('HighScore.csv', 'a') as file:
-            file.write("\n" + str(nameentry.get()) + "," + str(score))  
+            file.write(str(nameentry.get()) + "," + str(score))  
         file.close()
         submitButton.destroy()
         nameentry.destroy()
