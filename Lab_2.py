@@ -118,11 +118,6 @@ def __init__():
 # Function to open game window
 def startGame():
     global score
-    def submitScore():
-        with open('HighScore.csv', 'a') as file:
-            file.write("\n" + str(entry.get()) + "," + str(score))
-        file.close()
-        UpdateLeaderboard()
 
     def UpdateLeaderboard():
         with open('HighScore.csv', 'r') as readHighScore:
@@ -185,11 +180,27 @@ def startGame():
     Label(GameMainWindow, text="Score", padx=5, pady=5).grid(row=2, column=3, sticky="E")
     UpdateLeaderboard()
 
-    entry = Entry(GameMainWindow)
-    entry.grid()
-    Button(GameMainWindow, text="Submit Score", command=submitScore).grid()
-
     GameMainWindow.mainloop()
+
+
+
+
+def Fail():
+    def submitScore():
+        with open('HighScore.csv', 'a') as file:
+            file.write("\n" + str(entry.get()) + "," + str(score))
+        file.close()
+
+    failwindow = Tk()
+    entry = Entry(failwindow)
+    entry.grid()
+    Button(failwindow, text="Submit Score", command=submitScore).grid()
+    failwindow.title("Lose!")
+    retryLabel = Button(failwindow, text="Retry", command=startLevel)
+    retryLabel.grid(row=0, column=1)
+    quitLabel = Button(failwindow, text="Quit", command=failwindow.destroy)
+    quitLabel.grid(row=0, column=2)
+
 
 
 # Starts next game level
@@ -198,11 +209,13 @@ def startLevel():
     def countdown(t):
         countdownLabel['text'] = t
         if t > 0:
-            gamestart.after(100, countdown, round(t - 0.1, 1))
+            gamestart.after(5, countdown, round(t - 0.1, 1))
         else:
-            countdownLabel['text'] = "Time's Up!"
+            gamestart.destroy()
+            Fail()
 
     gamestart = Tk()
+    gamestart.title("In Game")
     tasktype = random.randint(0,1)
     level = 1
     # Countdown Module
@@ -223,10 +236,6 @@ def startLevel():
         goalLum1.grid(row=1, column=2)
         currLumGame = Label(gamestart, text="Luminescence: ")
         currLumGame.grid(row=2, column=1, padx=3, pady=3)
-
-
-    
-
 
 def quitGame():
     return
