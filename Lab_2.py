@@ -181,7 +181,10 @@ def startGame():
 
         quitGameButton = Button(SuccessWindow, text="Quit", command=quitGame, width=20)
         quitGameButton.grid(row=5, column=2, padx=5, pady=5)
-    
+        
+    def quitGame():
+        GameMainWindow.destroy()
+        
     GameMainWindow = Tk()
     GameMainWindow.geometry("800x400")
     GameMainWindow.title("Game")
@@ -284,12 +287,6 @@ def startLevel():
     countdown(countdownTime - 0.5*level)
     gamestart.mainloop()
 
-
-    
-
-
-def quitGame():
-    return
 
 
 # Function to start and stop daemon thread readout
