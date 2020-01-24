@@ -276,6 +276,7 @@ def Fail():
             file.write("\n" + str(entry.get()) + "," + str(score))  
         file.close()
         submitButton.destroy()
+        nameentry.destroy()
         Label(failwindow, text="Submitted!").grid(row=0, column=2, sticky='w')
 
 
@@ -289,7 +290,6 @@ def Fail():
         startGame()
 
     failwindow = Tk()
-<<<<<<< HEAD
     failwindow.geometry("400x150")
     failwindow.title("Lose!")
     
@@ -298,34 +298,21 @@ def Fail():
         failwindow.rowconfigure(i, weight=1)
 
     # enter player name and submit their score
-=======
-    failwindow.geometry('350x70')
->>>>>>> afad006cb98d7b5b3c9228642df579326eae9331
     nameLabel = Label(failwindow, text="Enter your Name: ")
-    nameLabel.grid(row=0, column=0, sticky="W")
-    entry = Entry(failwindow)
-<<<<<<< HEAD
-    entry.grid(row=0, column=2, sticky="W")
+    nameLabel.grid(row=0, column=1, padx=10)
+    nameentry = Entry(failwindow)
+    nameentry.grid(row=0, column=2, sticky="W")
     submitButton = HoverButton(failwindow, text="Submit Score", command=submitScore)
     submitButton.grid(row=0, column=3, sticky="W")
     
     Label(failwindow, text="\n").grid(row=1, column=0)
+
     # restart game 
     retryLabel = HoverButton(failwindow, text="Retry", command=failToIdle, width=20)
     retryLabel.grid(row=2, column=1, sticky="W")
     # quit game
     quitLabel = HoverButton(failwindow, text="Quit", command=failToMain, width=20)
     quitLabel.grid(row=2, column=2, sticky="E")
-=======
-    entry.grid(row=0, column=1)
-    submitButton = Button(failwindow, text="Submit Score", command=submitScore)
-    submitButton.grid(row=0, column=2, sticky='w')
-    failwindow.title("Lose!")
-    retryLabel = Button(failwindow, text="Retry", command=failToIdle)
-    retryLabel.grid(row=1, column=1, sticky="e")
-    quitLabel = Button(failwindow, text="Quit", command=failToMain)
-    quitLabel.grid(row=1, column=2, sticky="w")
->>>>>>> afad006cb98d7b5b3c9228642df579326eae9331
 
 
 # Starts next game level
@@ -478,7 +465,9 @@ countdownTime = 10
 score = 0
 level = 1
 
-
+# binds buttons to events (enter & leave)
+# code source:
+# https://stackoverflow.com/questions/49888623/tkinter-hovering-over-button-color-change
 class HoverButton(Button):
     def __init__(self, master, **kw):
         Button.__init__(self, master=master, **kw)
