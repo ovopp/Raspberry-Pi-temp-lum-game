@@ -28,7 +28,11 @@ def Idle():
             startLevel()
 
     Idle = Tk()
-    IdleLabel = Label(Idle, text='3')
+    Idle.geometry('100x100')
+    for y in range(10):
+        Idle.columnconfigure(y, weight=1)
+        Idle.rowconfigure(y, weight=1)
+    IdleLabel = Label(Idle, text='3', font=400)
     IdleLabel.pack()
     idleDown(3)
 
@@ -148,49 +152,6 @@ def startGame():
                 highscorerank += 1
                 if highscorerank >= 5:
                     break
-
-    # If the player successfuly completes the task then the success window opens
-    def success():
-        # Goes to the next level
-        def continueGame():
-            level += 1
-            SuccessWindow.destroy()
-            Idle()
-
-        # Exits the success window
-        def quitGame():
-            SuccessWindow.destroy()
-            Fail()
-
-        # Creates a new window
-        SuccessWindow = Tk()
-        SuccessWindow.geometry("400x200")
-        SuccessWindow.title("SUCCESS")
-
-        # Makes the window scalable
-        for i in range(10):
-            SuccessWindow.columnconfigure(i, weight=1)
-            SuccessWindow.rowconfigure(i, weight=1)
-
-        # Original score
-        Label(SuccessWindow, text="Score:", width=20).grid(row=2, column=1)
-        Label(SuccessWindow, text=str(score)).grid(row=2, column=2, sticky="W")
-
-        # Added score
-        Label(SuccessWindow, text="+").grid(row=3, column=1, sticky="E")
-        Label(SuccessWindow, text=str(level * 10)).grid(row=3, column=2, sticky="W")
-
-        # Final score
-        score += level * 10
-        Label(SuccessWindow, text=str(score)).grid(row=4, column=2, sticky="W")
-
-        # Continue and quit buttons
-        continueButton = Button(SuccessWindow, text="Continue", command=continueGame, width=20)
-        continueButton.grid(row=5, column=1, padx=5, pady=5)
-
-        quitGameButton = Button(SuccessWindow, text="Quit", command=quitGame, width=20)
-        quitGameButton.grid(row=5, column=2, padx=5, pady=5)
-
     # Exits game
     def quitGame():
         GameMainWindow.destroy()
@@ -246,6 +207,52 @@ def startGame():
 
     GameMainWindow.mainloop()
 
+    # If the player successfuly completes the task then the success window opens
+def success():
+    # Goes to the next level
+
+    def continueGame():
+        global level
+        level += 1
+        SuccessWindow.destroy()
+        Idle()
+
+    # Exits the success window
+    def quitGame():
+        SuccessWindow.destroy()
+        Fail()
+
+    global score
+    global level
+    # Creates a new window
+    SuccessWindow = Tk()
+    SuccessWindow.geometry("400x200")
+    SuccessWindow.title("SUCCESS")
+
+    # Makes the window scalable
+    for i in range(10):
+        SuccessWindow.columnconfigure(i, weight=1)
+        SuccessWindow.rowconfigure(i, weight=1)
+
+    # Original score
+    Label(SuccessWindow, text="Score:", width=20).grid(row=2, column=1)
+    Label(SuccessWindow, text=str(score)).grid(row=2, column=2, sticky="W")
+
+    # Added score
+    Label(SuccessWindow, text="+").grid(row=3, column=1, sticky="E")
+    Label(SuccessWindow, text=str(level * 10)).grid(row=3, column=2, sticky="W")
+
+    # Final score
+    score += level * 10
+    Label(SuccessWindow, text=str(score)).grid(row=4, column=2, sticky="W")
+
+    # Continue and quit buttons
+    continueButton = Button(SuccessWindow, text="Continue", command=continueGame, width=20)
+    continueButton.grid(row=5, column=1, padx=5, pady=5)
+
+    quitGameButton = Button(SuccessWindow, text="Quit", command=quitGame, width=20)
+    quitGameButton.grid(row=5, column=2, padx=5, pady=5)
+
 
 def Fail():
     def submitScore():
@@ -265,41 +272,82 @@ def Fail():
 
 # Starts next game level
 def startLevel():
+
+    def countdown(t):
+        countdownLabel['text'] = t
+        if tasktype:
+            currentLum = random.randint(50, 250)
+            currLumGame1['text'] = str(currentLum)
+            if t > 0:
+                if currentLum == randLum:
+                    gamestart.destroy()
+                    success()
+                else:
+                    gamestart.after(100, countdown, round(t - 0.1, 1))
+            else:
+                gamestart.destroy()
+                Fail()
+        else:
+            currentTemp = random.randint(10, 20)
+            currTempGame1['text'] = str(currentTemp)
+            if t > 0:
+                if currentTemp == randTemp:
+                    gamestart.destroy()
+                    success()
+                else:
+                    gamestart.after(100, countdown, round(t - 0.1, 1))
+            else:
+                gamestart.destroy()
+                Fail()
+
     global countdownTime
     global level
     randLum = random.randint(50, 250)
     randTemp = random.randint(10, 20)
 
-    def countdown(t):
-        global level
-        countdownLabel['text'] = t
-        if t > 0:
-            gamestart.after(100, countdown, round(t - 0.1, 1))
-        else:
-            gamestart.destroy()
-            Fail()
 
     gamestart = Tk()
     gamestart.title("In Game")
+    gamestart.geometry('250x100')
+    # Scales the box
+    for x in range(10):
+        gamestart.columnconfigure(x, weight=1)
+        gamestart.rowconfigure(x, weight=1)
+
     tasktype = random.randint(0, 1)
+
     # Countdown Module
     countdownLabel = Label(gamestart, text=countdownTime)
-    countdownLabel.grid()
+    countdownLabel.grid(row=1, column=3, sticky='E')
+    countdownLabel1 = Label(gamestart, text="Timer: ")
+    countdownLabel1.grid(row=1, column=1, sticky='W')
     if tasktype == 0:
+        randLum = 1000  # Blocks false Trues from other task
         goalTemp = Label(gamestart, text="Your goal temperature: ")
-        goalTemp.grid(row=1, column=1)
+        goalTemp.grid(row=2, column=1, padx=3, pady=3, sticky='w')
         goalTemp1 = Label(gamestart, text=randTemp)
-        goalTemp1.grid(row=1, column=2)
+        goalTemp1.grid(row=2, column=3, padx=3, pady=3, sticky='e')
         currTempGame = Label(gamestart, text="Temperature: ")
-        currTempGame.grid(row=2, column=1, padx=3, pady=3)
+        currTempGame.grid(row=3, column=1, padx=3, pady=3, sticky='w')
+        currTempGame1 = Label(gamestart, text=" ")
+        currTempGame1.grid(row=3, column=3, padx=3, pady=3, sticky='e')
     else:
+        randTemp = 1000  # Blocks false Trues from other task
         goalLum = Label(gamestart, text="Your goal luminescence: ")
-        goalLum.grid(row=1, column=1)
+        goalLum.grid(row=2, column=1, padx=3, pady=3, sticky='w')
         goalLum1 = Label(gamestart, text=randLum)
-        goalLum1.grid(row=1, column=2)
+        goalLum1.grid(row=2, column=3, padx=3, pady=3, sticky='e')
         currLumGame = Label(gamestart, text="Luminescence: ")
-        currLumGame.grid(row=2, column=1, padx=3, pady=3)
-    countdown(countdownTime - 0.5 * level)
+        currLumGame.grid(row=3, column=1, padx=3, pady=3, sticky='w')
+        currLumGame1 = Label(gamestart, text=" ")
+        currLumGame1.grid(row=3, column=3, padx=3, pady=3, sticky='e')
+    # calculates the countdown time
+    Label(gamestart, text='Score: ').grid(row=4, column=1, padx=3, pady=3, sticky='w')
+    Label(gamestart, text=str(score)).grid(row=4, column=3, padx=3, pady=3, sticky='e')
+    if level < 10:
+        countdown(round(countdownTime - 0.5 * level, 1))
+    else:
+        countdown(5)  # Final levels are all 5 seconds
 
 
 # Function to start and stop daemon thread readout
@@ -370,7 +418,7 @@ temperatureQueue = [0]
 lumQueue = [0]
 countdownTime = 10
 score = 0
-level = 0
+level = 1
 
 
 class HoverButton(Button):
