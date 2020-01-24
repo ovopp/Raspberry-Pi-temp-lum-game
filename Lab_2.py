@@ -271,7 +271,7 @@ def success():
 def Fail():
     def submitScore():
         with open('HighScore.csv', 'a') as file:
-            file.write("\n" + str(entry.get()) + "," + str(score))
+            file.write("\n" + str(entry.get()) + "," + str(score))  
         file.close()
         submitButton.destroy()
         Label(failwindow, text="Score Submitted!, press Quit to Return to Game Window").grid(row=1, column=0)
@@ -287,15 +287,18 @@ def Fail():
         startGame()
 
     failwindow = Tk()
+    nameLabel = Label(failwindow, text="Enter your Name: ")
+    nameLabel.grid(row=0, column=1, sticky="W")
     entry = Entry(failwindow)
     entry.grid(row=0, column=0)
     submitButton = Button(failwindow, text="Submit Score", command=submitScore)
     submitButton.grid(row=1, column=0)
     failwindow.title("Lose!")
+    Label(failwindow, text="\n").grid(row=1, column=0)
     retryLabel = Button(failwindow, text="Retry", command=failToIdle)
-    retryLabel.grid(row=0, column=1)
+    retryLabel.grid(row=2, column=1, sticky="E")
     quitLabel = Button(failwindow, text="Quit", command=failToMain)
-    quitLabel.grid(row=0, column=2)
+    quitLabel.grid(row=2, column=2, sticky="W")
 
 
 # Starts next game level
