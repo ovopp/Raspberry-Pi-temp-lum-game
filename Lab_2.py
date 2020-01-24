@@ -17,6 +17,14 @@ import operator
 '''Functions for buttons and initializations'''
 
 
+# Sets the default global values for the game
+def resetGlobals():
+    global score
+    global level
+    score = 0
+    level = 1
+
+
 def Idle():
     def idleDown(t):
         global level
@@ -152,9 +160,15 @@ def startGame():
                 highscorerank += 1
                 if highscorerank >= 5:
                     break
+
     # Exits game
     def quitGame():
         GameMainWindow.destroy()
+
+    def mainToIdle():
+        resetGlobals()
+        GameMainWindow.destroy()
+        Idle()
 
     GameMainWindow = Tk()
     GameMainWindow.geometry("800x400")
@@ -190,7 +204,7 @@ def startGame():
     Instruction5.grid(row=6, column=1)
 
     # Start and quit button
-    gameStartButton = Button(GameMainWindow, text="Start", command=Idle, width=20, height=3)
+    gameStartButton = Button(GameMainWindow, text="Start", command=mainToIdle, width=20, height=3)
     gameStartButton.grid(row=1, column=2, padx=5, pady=5)
 
     quitGameButton = Button(GameMainWindow, text="Quit", command=quitGame, width=20, height=3)
@@ -199,8 +213,6 @@ def startGame():
     # Highscores
     HighscoreLabel = Label(GameMainWindow, text="HIGH SCORES", padx=5, pady=5, width=20, height=3)
     HighscoreLabel.grid(row=1, column=3)
-
-    highscores = [5, 5, 5, 5, 5]
     Label(GameMainWindow, text="Name", padx=5, pady=5).grid(row=2, column=3, sticky="W")
     Label(GameMainWindow, text="Score", padx=5, pady=5).grid(row=2, column=3, sticky="E")
     UpdateLeaderboard()
@@ -208,6 +220,8 @@ def startGame():
     GameMainWindow.mainloop()
 
     # If the player successfuly completes the task then the success window opens
+
+
 def success():
     # Goes to the next level
 
@@ -260,19 +274,28 @@ def Fail():
             file.write("\n" + str(entry.get()) + "," + str(score))
         file.close()
 
+    def failToIdle():
+        resetGlobals()
+        failwindow.destroy()
+        Idle()
+
+    def failToMain():
+        failwindow.destroy()
+        startGame()
+
     failwindow = Tk()
     entry = Entry(failwindow)
     entry.grid()
     Button(failwindow, text="Submit Score", command=submitScore).grid()
     failwindow.title("Lose!")
-    retryLabel = Button(failwindow, text="Retry", command=startLevel)
+    retryLabel = Button(failwindow, text="Retry", command=failToIdle)
     retryLabel.grid(row=0, column=1)
-    quitLabel = Button(failwindow, text="Quit", command=failwindow.destroy)
+    quitLabel = Button(failwindow, text="Quit", command=failToMain)
     quitLabel.grid(row=0, column=2)
+
 
 # Starts next game level
 def startLevel():
-
     def countdown(t):
         countdownLabel['text'] = t
         if tasktype:
@@ -304,7 +327,6 @@ def startLevel():
     global level
     randLum = random.randint(50, 250)
     randTemp = random.randint(10, 20)
-
 
     gamestart = Tk()
     gamestart.title("In Game")
@@ -344,6 +366,8 @@ def startLevel():
     # calculates the countdown time
     Label(gamestart, text='Score: ').grid(row=4, column=1, padx=3, pady=3, sticky='w')
     Label(gamestart, text=str(score)).grid(row=4, column=3, padx=3, pady=3, sticky='e')
+    Label(gamestart, text='Level: ').grid(row=5, column=1, padx=3, pady=3, sticky='w')
+    Label(gamestart, text=str(level)).grid(row=5, column=3, padx=3, pady=3, sticky='e')
     if level < 10:
         countdown(round(countdownTime - 0.5 * level, 1))
     else:
@@ -408,7 +432,7 @@ def exitConfirm():
     no.grid(row=1, column=2, sticky="W")
 
 
-# Initialization Variables
+# Initialization Variables and Global Variables
 readTime = 2
 readTemp = False
 start = False
