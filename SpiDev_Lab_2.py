@@ -292,7 +292,7 @@ def Fail():
     # Stores the score of the player
     def submitScore():
         with open('HighScore.csv', 'a') as file:
-            file.write("\n" + str(nameentry.get()) + "," + str(score))  
+            file.write(str(nameentry.get()) + "," + str(score))  
         file.close()
         submitButton.destroy()
         nameentry.destroy()
