@@ -16,27 +16,37 @@ import operator
 
 '''Functions for buttons and initializations'''
 
+
+# Idle window before game start
 def Idle():
+    # countdown module for Idle
     def idleDown(t):
         global level
         IdleLabel['text'] = t
+
+        # Recursive loop to simulate counting down
         if t > 0:
-            Idle.after(1000, idleDown, t-1)
+            idleWindow.after(1000, idleDown, t - 1)
         else:
-            Idle.destroy()
+            idleWindow.destroy()
             startLevel()
 
-    Idle = Tk()
-    IdleLabel = Label(Idle,  text='3')
+    # starts the idle window
+    idleWindow = Tk()
+    IdleLabel = Label(idleWindow, text='3')
     IdleLabel.pack()
     idleDown(3)
 
+
+# function to reset the score and level (prepares the new game)
 def resetGlobals():
     global score
     global level
     score = 0
     level = 0
 
+
+# Turns off and on the plot
 def plotOnOff():
     global plotVar
     if plotVar:
@@ -138,6 +148,7 @@ def __init__():
 # Function to open game window
 def startGame():
     global score
+
     def submitScore():
         with open('HighScore.csv', 'a') as file:
             file.write("\n" + str(entry.get()) + "," + str(score))
@@ -150,8 +161,10 @@ def startGame():
             sort = sorted(csv1, key=lambda x: int(x[1]), reverse=True)
             highscorerank = 0
             for row in sort:
-                Label(GameMainWindow, text=str(row[0]), padx=5, pady=5).grid(row=3 + highscorerank, column=3, sticky="W")
-                Label(GameMainWindow, text=str(row[1]), padx=5, pady=5).grid(row=3 + highscorerank, column=3, sticky="E")
+                Label(GameMainWindow, text=str(row[0]), padx=5, pady=5).grid(row=3 + highscorerank, column=3,
+                                                                             sticky="W")
+                Label(GameMainWindow, text=str(row[1]), padx=5, pady=5).grid(row=3 + highscorerank, column=3,
+                                                                             sticky="E")
                 highscorerank += 1
                 if highscorerank >= 5:
                     break
@@ -218,6 +231,7 @@ def startLevel():
     global level
     randLum = random.randint(50, 250)
     randTemp = random.randint(10, 20)
+
     def countdown(t):
         global level
         countdownLabel['text'] = t
@@ -235,12 +249,12 @@ def startLevel():
                 Button(gamestart, text="Quit", command=gamestart.destroy).grid()
 
     gamestart = Tk()
-    tasktype = random.randint(0,1)
+    tasktype = random.randint(0, 1)
     # Countdown Module
     countdownLabel = Label(gamestart, text=countdownTime)
     countdownLabel.grid()
     if tasktype == 0:
-        randLum = 1000  #block off luminescence branch
+        randLum = 1000  # block off luminescence branch
         goalTemp = Label(gamestart, text="Your goal temperature: ")
         goalTemp.grid(row=1, column=1)
         goalTemp1 = Label(gamestart, text=randTemp)
@@ -248,18 +262,15 @@ def startLevel():
         currTempGame = Label(gamestart, text="Temperature: ")
         currTempGame.grid(row=2, column=1, padx=3, pady=3)
     else:
-        randTemp = 1000  #block off temp branch
+        randTemp = 1000  # block off temp branch
         goalLum = Label(gamestart, text="Your goal luminescence: ")
         goalLum.grid(row=1, column=1)
         goalLum1 = Label(gamestart, text=randLum)
         goalLum1.grid(row=1, column=2)
         currLumGame = Label(gamestart, text="Luminescence: ")
         currLumGame.grid(row=2, column=1, padx=3, pady=3)
-    countdown(countdownTime - 0.5*level)
+    countdown(countdownTime - 0.5 * level)
     gamestart.mainloop()
-
-
-    
 
 
 def quitGame():
@@ -312,7 +323,6 @@ def getTime():
         Label(window2, text="Invalid input! Please input another number").grid(row=1, column=3)
         Label(window2, text="The current read time is: " + str(readTime) + " Seconds").grid(row=2, column=3)
         Button(window2, text="Close Window", command=lambda: window2.destroy()).grid(row=3, column=3)
-
 
 
 def exitConfirm():
@@ -466,4 +476,3 @@ gameButton.grid(row=7, column=5, sticky="W", padx=5, pady=5, columnspan=3)
 exitButton.grid(row=8, column=5, sticky="W", padx=5, pady=5, columnspan=3)
 
 window.mainloop()
-
