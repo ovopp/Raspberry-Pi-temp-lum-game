@@ -1,18 +1,10 @@
 from tkinter import *
 import matplotlib.pyplot as plt
-#from gpiozero import MCP3008
 import threading
 import time
 import random
 from tkinter import ttk
 import csv
-import operator
-
-# Sets up light sensor
-#photocell = MCP3008(0)
-
-# Sets up temperature sensor
-#lm35 = MCP3008(1)
 
 '''Functions for buttons and initializations'''
 
@@ -32,17 +24,17 @@ def Idle():
         global level
         IdleLabel['text'] = t
         if t > 0:
-            Idle.after(1000, idleDown, t - 1)
+            idle.after(1000, idleDown, t - 1)
         else:
-            Idle.destroy()
+            idle.destroy()
             startLevel()
 
-    Idle = Tk()
-    Idle.geometry('100x100')
+    idle = Tk()
+    idle.geometry('100x100')
     for y in range(10):
-        Idle.columnconfigure(y, weight=1)
-        Idle.rowconfigure(y, weight=1)
-    IdleLabel = Label(Idle, text='3', font=400)
+        idle.columnconfigure(y, weight=1)
+        idle.rowconfigure(y, weight=1)
+    IdleLabel = Label(idle, text='3', font=400)
     IdleLabel.pack()
     idleDown(3)
 
@@ -59,7 +51,6 @@ def plotOnOff():
 # Function for plot button
 def plotTempandLum():
     global plotVar
-
     while True:
         try:
             while plotVar:
@@ -107,14 +98,14 @@ def getTempLum():
         while readTemp:
             if len(temperatureQueue) < 10:
                 # Inserts current values into temperature and luminense queue
-                temperatureQueue.insert(0, random.randint(0, 100))
+                temperatureQueue.insert(0, random.randint(0, 50))
                 lumQueue.insert(0, random.randint(0, 255))
                 setTemp(temperatureQueue[0])
                 setLight(lumQueue[0])
             else:
                 # Inserts current values into temperature and luminense queue and pops the last value
                 temperatureQueue.pop()  # Pops the last element
-                temperatureQueue.insert(0, random.randint(0, 100))  # Pushes the first element into Queue, replace with
+                temperatureQueue.insert(0, random.randint(0, 50))  # Pushes the first element into Queue, replace with
                 # lm35.value
                 lumQueue.pop()
                 lumQueue.insert(0, random.randint(0, 255))
@@ -192,9 +183,9 @@ def startGame():
     GameMainWindow = Tk()
     GameMainWindow.geometry("1000x500")
     GameMainWindow.title("Game")
-    for i in range(10):
-        GameMainWindow.columnconfigure(i, weight=1)
-        GameMainWindow.rowconfigure(i, weight=1)
+    for y in range(10):
+        GameMainWindow.columnconfigure(y, weight=1)
+        GameMainWindow.rowconfigure(y, weight=1)
 
     # Game instructions
     InstructionLabel = Label(GameMainWindow, text="INSTRUCTIONS", padx=5, pady=5, width=20, height=3)
@@ -205,17 +196,20 @@ def startGame():
     Instruction1.grid(row=2, column=1)
 
     Instruction2 = Label(GameMainWindow,
-                         text="If you complete the task your score will be increased and the next\n task will become harder",
+                         text="If you complete the task your score will be increased and the next\n task will become "
+                              "harder",
                          padx=5, pady=5)
     Instruction2.grid(row=3, column=1)
 
     Instruction3 = Label(GameMainWindow,
-                         text="If you don't complete the task your game will end and your score\n will be added to the leaderboard if it is high enough",
+                         text="If you don't complete the task your game will end and your score\n will be added to "
+                              "the leaderboard if it is high enough",
                          padx=5, pady=5)
     Instruction3.grid(row=4, column=1)
 
     Instruction4 = Label(GameMainWindow,
-                         text="Possible tasks are: getting the temperature above or below a certain\n value or getting the light level above or below a certain value",
+                         text="Possible tasks are: getting the temperature above or below a certain\n value or "
+                              "getting the light level above or below a certain value",
                          padx=5, pady=5)
     Instruction4.grid(row=5, column=1)
 
@@ -238,10 +232,13 @@ def startGame():
 
     GameMainWindow.mainloop()
 
-    # If the player successfuly completes the task then the success window opens
+    # If the player successfully completes the task then the success window opens
 
 
 def success():
+    global score
+    global level
+
     # Goes to the next level
     def continueGame():
         global level
@@ -253,18 +250,15 @@ def success():
     def quitGame():
         SuccessWindow.destroy()
         Fail()
-
-    global score
-    global level
     # Creates a new window
     SuccessWindow = Tk()
     SuccessWindow.geometry("400x200")
     SuccessWindow.title("SUCCESS")
 
     # Makes the window scalable
-    for i in range(10):
-        SuccessWindow.columnconfigure(i, weight=1)
-        SuccessWindow.rowconfigure(i, weight=1)
+    for x in range(10):
+        SuccessWindow.columnconfigure(x, weight=1)
+        SuccessWindow.rowconfigure(x, weight=1)
 
     # Original score
     Label(SuccessWindow, text="Score:", width=20).grid(row=2, column=1)
@@ -313,9 +307,9 @@ def Fail():
     failwindow.geometry("600x200")
     failwindow.title("Lose!")
 
-    for i in range(10):
-        failwindow.columnconfigure(i, weight=1)
-        failwindow.rowconfigure(i, weight=1)
+    for z in range(10):
+        failwindow.columnconfigure(z, weight=1)
+        failwindow.rowconfigure(z, weight=1)
 
     # enter player name and submit their score
     nameLabel = Label(failwindow, text="Enter your Name: ")
@@ -338,7 +332,7 @@ def Fail():
 
 # Starts next game level
 def startLevel():
-    # Runs the countdown on the level and checks wether the user has completed the task
+    # Runs the countdown on the level and checks whether the user has completed the task
     def countdown(t):
         countdownLabel['text'] = t
         if tasktype:
