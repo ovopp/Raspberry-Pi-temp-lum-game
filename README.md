@@ -19,6 +19,16 @@ Usage and Details:
 - Values are presented in the GUI, updating as the values are read
 - A game window can be opened with a leaderboard and various levels to conquer
 
+Images:
+Program Running with sensor data being shown
+I[]()
+
+Changing the read time of the sensors
+I[]()
+
+Game Window
+I[]()
+
 RoadMap:
 - The project was initially just a temperature and luminescence visualizer, but was converted into a game based off our team's love
 to make something fun
