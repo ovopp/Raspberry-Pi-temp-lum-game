@@ -21,13 +21,13 @@ Usage and Details:
 
 Images:
 Program Running with sensor data being shown
-I[]()
+![](2020-01-24-090657_1000x600_scrot.png)
 
 Changing the read time of the sensors
-I[]()
+![](2020-01-24-090812_1000x600_scrot.png)
 
 Game Window
-I[]()
+![](2020-01-24-090929_1000x500_scrot.png)
 
 RoadMap:
 - The project was initially just a temperature and luminescence visualizer, but was converted into a game based off our team's love
